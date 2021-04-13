@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Button, Space, Row, Col, Card } from "antd";
+import { Button, Space, Row, Col, Card, Steps } from "antd";
 import axios from "axios";
 import html2canvas from "html2canvas";
 import CanvasDraw from "react-canvas-draw";
 import LZ from "lz-string";
 import { useSimpleLocalStorage } from "../hooks";
+
+const { Step } = Steps;
 
 const ipfsAPI = require("ipfs-http-client");
 const ipfs = ipfsAPI({ host: "ipfs.infura.io", port: "5001", protocol: "https" });
@@ -12,15 +14,16 @@ const ipfs = ipfsAPI({ host: "ipfs.infura.io", port: "5001", protocol: "https" }
 // import { stravaAct1Json } from "../stravaAct1Json";
 // import { stravaAct2Json } from "../stravaAct2Json";
 
-const { REACT_APP_STRAVA_CLIENTID, REACT_APP_STRAVA_SECRET, REACT_APP_STRAVA_CALLBACK } = process.env;
+const { REACT_APP_STRAVA_CLIENTID, REACT_APP_STRAVA_SECRET, REACT_APP_STRAVA_CALLBACK, REACT_APP_GOOGLE_APIKEY } = process.env;
 
 let stravaActJson = {};
 
-let canvasDraw = CanvasDraw;
+
 
 const clientId = REACT_APP_STRAVA_CLIENTID;
 const clientSecret = REACT_APP_STRAVA_SECRET;
 const callback = REACT_APP_STRAVA_CALLBACK;
+const googleApiKey = REACT_APP_GOOGLE_APIKEY;
 
 const searchParams = new URLSearchParams(window.location.href);
 let code = "",
@@ -30,20 +33,21 @@ if (searchParams.has("code")) {
   code = searchParams.get("code");
 }
 
-if (window.localStorage.getItem("accessToken") != "") {
-  accessToken = window.localStorage.getItem("accessToken");
-}
-if (window.localStorage.getItem("refreshToken") != "") {
-  refreshToken = window.localStorage.getItem("refreshToken");
-}
-
-const AuthorizeUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${callback}&response_type=code&scope=activity:read`;
-const AccessTokenUrl = `https://www.strava.com/oauth/token?client_id=${clientId}&client_secret=${clientSecret}&grant_type=authorization_code&code=${code}`;
-const RefreshTokenUrl = `https://www.strava.com/oauth/token?client_id=${clientId}&client_secret=${clientSecret}&grant_type=refresh_token&refresh_token=${refreshToken}`;
-const AllActivitiesUrl = `https://www.strava.com/api/v3/activities?per_page=10`;
-const ActivityUrl = _act => `https://www.strava.com/api/v3/activities/${_act}?include_all_efforts=true`;
+//-- start - canvas-draw --
+let canvasDraw = CanvasDraw;
+//-- end - canvas-draw --
 
 //-- start - map --
+const initScript = () => {
+  if (!document.getElementById("google_map_js")) {
+    const _el = document.createElement("script");
+    _el.setAttribute("id", "google_map_js");
+    _el.src = `http://maps.googleapis.com/maps/api/js?key=${googleApiKey}&amp;libraries=geometry&amp;sensor=false`;
+    document.head.appendChild(_el);
+  }
+};
+// initScript();
+
 const initDiv = () => {
   if (!document.getElementById("map_canvas")) {
     const _el = document.createElement("div");
@@ -133,7 +137,7 @@ const initMaps = async () => {
       },
     ],
   });
-  animateCircle(setRegion);
+  // animateCircle(setRegion);
 
   // decodedPath = window.google.maps.geometry.encoding.decodePath(stravaAct2Json.map.summary_polyline);
   // setRegion = new window.google.maps.Polyline({
@@ -288,6 +292,12 @@ export default function StravaActivityMap({ address, tx, writeContracts }) {
   const [stats, setStats] = useState();
   const [profile, setProfile] = useState();
 
+  const AuthorizeUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${callback}&response_type=code&scope=activity:read`;
+  const AccessTokenUrl = `https://www.strava.com/oauth/token?client_id=${clientId}&client_secret=${clientSecret}&grant_type=authorization_code&code=${code}`;
+  const RefreshTokenUrl = `https://www.strava.com/oauth/token?client_id=${clientId}&client_secret=${clientSecret}&grant_type=refresh_token&refresh_token=${refreshToken}`;
+  const AllActivitiesUrl = `https://www.strava.com/api/v3/activities?per_page=10`;
+  const ActivityUrl = _act => `https://www.strava.com/api/v3/activities/${_act}?include_all_efforts=true`;
+
   // useEffect(() => {
   //   initMaps();
   // }, []);
@@ -405,7 +415,6 @@ export default function StravaActivityMap({ address, tx, writeContracts }) {
           await setActivityStats();
 
           await initMaps();
-          setTimeout(captureHtmltoImage, 1000);
         })
         .catch(error => {
           console.log(error.response);
@@ -451,7 +460,7 @@ export default function StravaActivityMap({ address, tx, writeContracts }) {
       // showDiv(false);
 
       await canvasDraw.saveableCanvas.clear();
-      setTimeout(playCanvasImage, 1000);
+      await playCanvasImage();
     });
 
     // html2canvas(map_canvas,{
@@ -471,6 +480,10 @@ export default function StravaActivityMap({ address, tx, writeContracts }) {
   const playCanvasImage = async () => {
     const _dataURL = await LZ.decompress(window.localStorage.getItem("savedDrawing"));
     await canvasDraw.saveableCanvas.loadSaveData(_dataURL, false);
+  };
+
+  const saveMap = async () => {
+    captureHtmltoImage();
   };
 
   const saveData = async () => {
@@ -591,7 +604,41 @@ export default function StravaActivityMap({ address, tx, writeContracts }) {
   };
 
   return (
-    <div style={{ margin: "auto", marginTop: 10, paddingBottom: 10 }}>
+    <div style={{ margin: "auto", marginTop: 10, padding: 10 }}>
+      <div style={{ margin: "auto", marginTop: 10 }}>
+        <Steps size="small" direction="vertical">
+          <Step
+            title="Network"
+            description=" please connect to kovan testnet."
+            status={"process"}
+          />
+          <Step
+            title="Authorize"
+            description=" please connect to Strava"
+            status={"process"}
+          />
+          <Step
+            title="List Activities"
+            description=" please click on button to list Strava Activities"
+            status={"process"}
+          />
+          <Step
+            title="Draw/Save Signature"
+            description="Draw Signature to make it unique NFT"
+            status={"process"}
+          />
+          <Step
+            title="Mint NFT"
+            description="mint the nft on kovan testnet"
+            status={"process"}
+          />
+          <Step
+            title="View NFT on opensea"
+            description="view and trade NFT on opensea"
+            status={"process"}
+          />
+        </Steps>
+      </div>
       <Button
         type={"primary"}
         onClick={() => {
@@ -636,7 +683,7 @@ export default function StravaActivityMap({ address, tx, writeContracts }) {
                     getActivity(_act.id); //4981791600 4450170947
                   }}
                 >
-                  Run🏃🏽‍♂ - {_act.id} - {_act.name}
+                  Run🏃🏽‍♂ : {_act.id} : {_act.name}
                 </Button>
               );
             })}
@@ -651,7 +698,7 @@ export default function StravaActivityMap({ address, tx, writeContracts }) {
                     getActivity(_act.id); //4981791600 4450170947
                   }}
                 >
-                  Ride🚴🏽‍♂️ - {_act.id} - {_act.name}
+                  Ride🚴🏽‍♂ : {_act.id} : {_act.name}
                 </Button>
               );
             })}
@@ -663,9 +710,16 @@ export default function StravaActivityMap({ address, tx, writeContracts }) {
       >
         <div id="map_canvas" style={{ width: 500, height: 500 }}></div>
       </div>
-
       <div style={{ width: 500, height: "100%", margin: "auto", marginTop: 10, paddingBottom: 10 }}>
         <Space style={{ marginTop: 5 }}>
+          <Button
+            type={"primary"}
+            onClick={() => {
+              saveMap();
+            }}
+          >
+            Save Map
+          </Button>
           <Button
             type={"primary"}
             onClick={() => {
@@ -682,6 +736,36 @@ export default function StravaActivityMap({ address, tx, writeContracts }) {
           >
             Save Image
           </Button>
+        </Space>
+        <div
+          id="canvas_container"
+          style={{
+            width: 520,
+            height: 520,
+            display: "block",
+            margin: "auto",
+            marginTop: 10,
+            borderRadius: 20 /*border:"10px solid #b1dcb1"*/,
+          }}
+        >
+          <CanvasDraw
+            ref={_c => (canvasDraw.saveableCanvas = _c)}
+            saveData={LZ.decompress(window.localStorage.getItem("savedDrawing"))}
+            imgSrc={imgSrc}
+            bm={bm}
+            stats={stats}
+            profile={profile}
+            hideGrid={false}
+            brushRadius={5}
+            canvasWidth={500}
+            canvasHeight={500}
+            loadTimeOffset={3}
+
+            //style={{ boxShadow: "0 10px 6px -6px #777" }}
+            //style={{ margin: "auto", marginTop: 10 }}
+          />
+        </div>
+        <Space style={{ marginTop: 5 }}>
           <Button
             type={"primary"}
             onClick={() => {
@@ -753,34 +837,6 @@ export default function StravaActivityMap({ address, tx, writeContracts }) {
             mint nft
           </Button>
         </Space>
-        <div
-          id="canvas_container"
-          style={{
-            width: 520,
-            height: 520,
-            display: "block",
-            margin: "auto",
-            marginTop: 10,
-            borderRadius: 20 /*border:"10px solid #b1dcb1"*/,
-          }}
-        >
-          <CanvasDraw
-            ref={_c => (canvasDraw.saveableCanvas = _c)}
-            saveData={LZ.decompress(window.localStorage.getItem("savedDrawing"))}
-            imgSrc={imgSrc}
-            bm={bm}
-            stats={stats}
-            profile={profile}
-            hideGrid={false}
-            brushRadius={5}
-            canvasWidth={500}
-            canvasHeight={500}
-            loadTimeOffset={3}
-
-            //style={{ boxShadow: "0 10px 6px -6px #777" }}
-            //style={{ margin: "auto", marginTop: 10 }}
-          />
-        </div>
       </div>
     </div>
   );
