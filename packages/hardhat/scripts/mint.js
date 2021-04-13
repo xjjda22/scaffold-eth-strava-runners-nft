@@ -4,210 +4,248 @@ const chalk = require("chalk");
 const { config, ethers } = require("hardhat");
 const { utils } = require("ethers");
 const R = require("ramda");
-const ipfsAPI = require('ipfs-http-client');
-const ipfs = ipfsAPI({host: 'ipfs.infura.io', port: '5001', protocol: 'https' })
+const ipfsAPI = require("ipfs-http-client");
+const ipfs = ipfsAPI({
+  host: "ipfs.infura.io",
+  port: "5001",
+  protocol: "https"
+});
 
-const delayMS = 1000 //sometimes xDAI needs a 6000ms break lol 😅
+const delayMS = 1000; //sometimes xDAI needs a 6000ms break lol 😅
 
 const main = async () => {
-
   // ADDRESS TO MINT TO:
-  const toAddress = "0xD75b0609ed51307E13bae0F9394b5f63A7f8b6A1"
+  const toAddress = "0x768ebF5226356278719cFF9781eb84942f221298";
 
-  console.log("\n\n 🎫 Minting to "+toAddress+"...\n");
+  console.log("\n\n 🎫 Minting to " + toAddress + "...\n");
 
-  const yourCollectible = await ethers.getContractAt('YourCollectible', fs.readFileSync("./artifacts/YourCollectible.address").toString())
+  const yourCollectible = await ethers.getContractAt(
+    "YourCollectible",
+    fs.readFileSync("./artifacts/YourCollectible.address").toString()
+  );
 
+  // Uploading buffalo...
+  // Minting buffalo with IPFS hash (QmfVMAmNM1kDEBYrC2TPzQDoCRFH6F5tE1e9Mr4FkkR5Xr)
+  // Uploading zebra...
+  // Minting zebra with IPFS hash (QmVHi3c4qkZcH3cJynzDXRm5n7dzc9R9TUtUcfnWQvhdcw)
+  // Uploading rhino...
+  // Minting rhino with IPFS hash (QmcvcUaKf6JyCXhLD1by6hJXNruPQGs3kkLg2W1xr7nF1j)
+  // Uploading fish...
+  // Minting fish with IPFS hash (QmZUaKqR7Sd2iJHABbRmAN94nKqEjjj9GdM1LR66UDKUhe)
+  // Uploading flamingo...
+  // Minting flamingo with IPFS hash (QmW95YgCMVFSfA4G6tNP86BnkTBVkQBY6bUYYb8Cqtpr6m)
+  // Uploading godzilla...
+  // Minting godzilla with IPFS hash (QmWncWK3cherDbRgkzzqZRfxAaShti29MTEMpFUmEcysXi)
 
-  const buffalo = {
-    "description": "It's actually a bison?",
-    "external_url": "https://austingriffith.com/portfolio/paintings/",// <-- this can link to a page for the specific file too
-    "image": "https://austingriffith.com/images/paintings/buffalo.jpg",
-    "name": "Buffalo",
-    "attributes": [
-       {
-         "trait_type": "BackgroundColor",
-         "value": "green"
-       },
-       {
-         "trait_type": "Eyes",
-         "value": "googly"
-       },
-       {
-         "trait_type": "Stamina",
-         "value": 42
-       }
-    ]
-  }
-  console.log("Uploading buffalo...")
-  const uploaded = await ipfs.add(JSON.stringify(buffalo))
+  // const buffalo = {
+  //   description: "It's actually a bison?",
+  //   external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
+  //   image: "https://austingriffith.com/images/paintings/buffalo.jpg",
+  //   name: "Buffalo",
+  //   attributes: [
+  //     {
+  //       trait_type: "BackgroundColor",
+  //       value: "green"
+  //     },
+  //     {
+  //       trait_type: "Eyes",
+  //       value: "googly"
+  //     },
+  //     {
+  //       trait_type: "Stamina",
+  //       value: 42
+  //     }
+  //   ]
+  // };
+  // console.log("Uploading buffalo...");
+  // // const uploaded = await ipfs.add(JSON.stringify(buffalo))
 
-  console.log("Minting buffalo with IPFS hash ("+uploaded.path+")")
-  await yourCollectible.mintItem(toAddress,uploaded.path,{gasLimit:400000})
+  // // console.log("Minting buffalo with IPFS hash ("+uploaded.path+")")
+  // // await yourCollectible.mintItem(toAddress,uploaded.path,{gasLimit:400000})
+  // await yourCollectible.mintItem(
+  //   toAddress,
+  //   "QmfVMAmNM1kDEBYrC2TPzQDoCRFH6F5tE1e9Mr4FkkR5Xr",
+  //   { gasLimit: 400000 }
+  // );
 
+  // await sleep(delayMS);
 
-  await sleep(delayMS)
+  // const zebra = {
+  //   description: "What is it so worried about?",
+  //   external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
+  //   image: "https://austingriffith.com/images/paintings/zebra.jpg",
+  //   name: "Zebra",
+  //   attributes: [
+  //     {
+  //       trait_type: "BackgroundColor",
+  //       value: "blue"
+  //     },
+  //     {
+  //       trait_type: "Eyes",
+  //       value: "googly"
+  //     },
+  //     {
+  //       trait_type: "Stamina",
+  //       value: 38
+  //     }
+  //   ]
+  // };
+  // console.log("Uploading zebra...");
+  // // const uploadedzebra = await ipfs.add(JSON.stringify(zebra))
 
+  // // console.log("Minting zebra with IPFS hash ("+uploadedzebra.path+")")
+  // // await yourCollectible.mintItem(toAddress,uploadedzebra.path,{gasLimit:400000})
+  // await yourCollectible.mintItem(
+  //   toAddress,
+  //   "QmVHi3c4qkZcH3cJynzDXRm5n7dzc9R9TUtUcfnWQvhdcw",
+  //   { gasLimit: 400000 }
+  // );
 
-  const zebra = {
-    "description": "What is it so worried about?",
-    "external_url": "https://austingriffith.com/portfolio/paintings/",// <-- this can link to a page for the specific file too
-    "image": "https://austingriffith.com/images/paintings/zebra.jpg",
-    "name": "Zebra",
-    "attributes": [
-       {
-         "trait_type": "BackgroundColor",
-         "value": "blue"
-       },
-       {
-         "trait_type": "Eyes",
-         "value": "googly"
-       },
-       {
-         "trait_type": "Stamina",
-         "value": 38
-       }
-    ]
-  }
-  console.log("Uploading zebra...")
-  const uploadedzebra = await ipfs.add(JSON.stringify(zebra))
+  // await sleep(delayMS);
 
-  console.log("Minting zebra with IPFS hash ("+uploadedzebra.path+")")
-  await yourCollectible.mintItem(toAddress,uploadedzebra.path,{gasLimit:400000})
+  // const rhino = {
+  //   description: "What a horn!",
+  //   external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
+  //   image: "https://austingriffith.com/images/paintings/rhino.jpg",
+  //   name: "Rhino",
+  //   attributes: [
+  //     {
+  //       trait_type: "BackgroundColor",
+  //       value: "pink"
+  //     },
+  //     {
+  //       trait_type: "Eyes",
+  //       value: "googly"
+  //     },
+  //     {
+  //       trait_type: "Stamina",
+  //       value: 22
+  //     }
+  //   ]
+  // };
+  // console.log("Uploading rhino...");
+  // // const uploadedrhino = await ipfs.add(JSON.stringify(rhino))
 
+  // // console.log("Minting rhino with IPFS hash ("+uploadedrhino.path+")")
+  // // await yourCollectible.mintItem(toAddress,uploadedrhino.path,{gasLimit:400000})
+  // await yourCollectible.mintItem(
+  //   toAddress,
+  //   "QmcvcUaKf6JyCXhLD1by6hJXNruPQGs3kkLg2W1xr7nF1j",
+  //   { gasLimit: 400000 }
+  // );
 
+  // await sleep(delayMS);
 
-  await sleep(delayMS)
+  // const fish = {
+  //   description: "Is that an underbyte?",
+  //   external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
+  //   image: "https://austingriffith.com/images/paintings/fish.jpg",
+  //   name: "Fish",
+  //   attributes: [
+  //     {
+  //       trait_type: "BackgroundColor",
+  //       value: "blue"
+  //     },
+  //     {
+  //       trait_type: "Eyes",
+  //       value: "googly"
+  //     },
+  //     {
+  //       trait_type: "Stamina",
+  //       value: 15
+  //     }
+  //   ]
+  // };
+  // console.log("Uploading fish...");
+  // // const uploadedfish = await ipfs.add(JSON.stringify(fish))
 
+  // // console.log("Minting fish with IPFS hash ("+uploadedfish.path+")")
+  // // await yourCollectible.mintItem(toAddress,uploadedfish.path,{gasLimit:400000})
+  // await yourCollectible.mintItem(
+  //   toAddress,
+  //   "QmZUaKqR7Sd2iJHABbRmAN94nKqEjjj9GdM1LR66UDKUhe",
+  //   { gasLimit: 400000 }
+  // );
 
-  const rhino = {
-    "description": "What a horn!",
-    "external_url": "https://austingriffith.com/portfolio/paintings/",// <-- this can link to a page for the specific file too
-    "image": "https://austingriffith.com/images/paintings/rhino.jpg",
-    "name": "Rhino",
-    "attributes": [
-       {
-         "trait_type": "BackgroundColor",
-         "value": "pink"
-       },
-       {
-         "trait_type": "Eyes",
-         "value": "googly"
-       },
-       {
-         "trait_type": "Stamina",
-         "value": 22
-       }
-    ]
-  }
-  console.log("Uploading rhino...")
-  const uploadedrhino = await ipfs.add(JSON.stringify(rhino))
+  // await sleep(delayMS);
 
-  console.log("Minting rhino with IPFS hash ("+uploadedrhino.path+")")
-  await yourCollectible.mintItem(toAddress,uploadedrhino.path,{gasLimit:400000})
+  // const flamingo = {
+  //   description: "So delicate.",
+  //   external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
+  //   image: "https://austingriffith.com/images/paintings/flamingo.jpg",
+  //   name: "Flamingo",
+  //   attributes: [
+  //     {
+  //       trait_type: "BackgroundColor",
+  //       value: "black"
+  //     },
+  //     {
+  //       trait_type: "Eyes",
+  //       value: "googly"
+  //     },
+  //     {
+  //       trait_type: "Stamina",
+  //       value: 6
+  //     }
+  //   ]
+  // };
+  // console.log("Uploading flamingo...");
+  // // const uploadedflamingo = await ipfs.add(JSON.stringify(flamingo))
 
+  // // console.log("Minting flamingo with IPFS hash ("+uploadedflamingo.path+")")
+  // // await yourCollectible.mintItem(toAddress,uploadedflamingo.path,{gasLimit:400000})
+  // await yourCollectible.mintItem(
+  //   toAddress,
+  //   "QmW95YgCMVFSfA4G6tNP86BnkTBVkQBY6bUYYb8Cqtpr6m",
+  //   { gasLimit: 400000 }
+  // );
 
+  // const godzilla = {
+  //   description: "Raaaar!",
+  //   external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
+  //   image: "https://austingriffith.com/images/paintings/godzilla.jpg",
+  //   name: "Godzilla",
+  //   attributes: [
+  //     {
+  //       trait_type: "BackgroundColor",
+  //       value: "orange"
+  //     },
+  //     {
+  //       trait_type: "Eyes",
+  //       value: "googly"
+  //     },
+  //     {
+  //       trait_type: "Stamina",
+  //       value: 99
+  //     }
+  //   ]
+  // };
+  // console.log("Uploading godzilla...");
+  // // const uploadedgodzilla = await ipfs.add(JSON.stringify(godzilla))
 
-  await sleep(delayMS)
+  // // console.log("Minting godzilla with IPFS hash ("+uploadedgodzilla.path+")")
+  // // await yourCollectible.mintItem(toAddress,uploadedgodzilla.path,{gasLimit:400000})
+  // await yourCollectible.mintItem(
+  //   toAddress,
+  //   "QmWncWK3cherDbRgkzzqZRfxAaShti29MTEMpFUmEcysXi",
+  //   { gasLimit: 400000 }
+  // );
 
+  await sleep(delayMS);
 
-  const fish = {
-    "description": "Is that an underbyte?",
-    "external_url": "https://austingriffith.com/portfolio/paintings/",// <-- this can link to a page for the specific file too
-    "image": "https://austingriffith.com/images/paintings/fish.jpg",
-    "name": "Fish",
-    "attributes": [
-       {
-         "trait_type": "BackgroundColor",
-         "value": "blue"
-       },
-       {
-         "trait_type": "Eyes",
-         "value": "googly"
-       },
-       {
-         "trait_type": "Stamina",
-         "value": 15
-       }
-    ]
-  }
-  console.log("Uploading fish...")
-  const uploadedfish = await ipfs.add(JSON.stringify(fish))
+  console.log(
+    "Transferring Ownership of YourCollectible to " + toAddress + "..."
+  );
 
-  console.log("Minting fish with IPFS hash ("+uploadedfish.path+")")
-  await yourCollectible.mintItem(toAddress,uploadedfish.path,{gasLimit:400000})
+  await yourCollectible.transferOwnership(toAddress);
 
+  await sleep(delayMS);
 
-
-  await sleep(delayMS)
-
-
-  const flamingo = {
-    "description": "So delicate.",
-    "external_url": "https://austingriffith.com/portfolio/paintings/",// <-- this can link to a page for the specific file too
-    "image": "https://austingriffith.com/images/paintings/flamingo.jpg",
-    "name": "Flamingo",
-    "attributes": [
-       {
-         "trait_type": "BackgroundColor",
-         "value": "black"
-       },
-       {
-         "trait_type": "Eyes",
-         "value": "googly"
-       },
-       {
-         "trait_type": "Stamina",
-         "value": 6
-       }
-    ]
-  }
-  console.log("Uploading flamingo...")
-  const uploadedflamingo = await ipfs.add(JSON.stringify(flamingo))
-
-  console.log("Minting flamingo with IPFS hash ("+uploadedflamingo.path+")")
-  await yourCollectible.mintItem(toAddress,uploadedflamingo.path,{gasLimit:400000})
-
-
-
-
-
-  const godzilla = {
-    "description": "Raaaar!",
-    "external_url": "https://austingriffith.com/portfolio/paintings/",// <-- this can link to a page for the specific file too
-    "image": "https://austingriffith.com/images/paintings/godzilla.jpg",
-    "name": "Godzilla",
-    "attributes": [
-       {
-         "trait_type": "BackgroundColor",
-         "value": "orange"
-       },
-       {
-         "trait_type": "Eyes",
-         "value": "googly"
-       },
-       {
-         "trait_type": "Stamina",
-         "value": 99
-       }
-    ]
-  }
-  console.log("Uploading godzilla...")
-  const uploadedgodzilla = await ipfs.add(JSON.stringify(godzilla))
-
-  console.log("Minting godzilla with IPFS hash ("+uploadedgodzilla.path+")")
-  await yourCollectible.mintItem(toAddress,uploadedgodzilla.path,{gasLimit:400000})
-
-
-
-
-  await sleep(delayMS)
-
-  console.log("Transferring Ownership of YourCollectible to "+toAddress+"...")
-
-  await yourCollectible.transferOwnership(toAddress)
-
-  await sleep(delayMS)
+  const deployerWallet = ethers.provider.getSigner();
+  await deployerWallet.sendTransaction({
+    to: "0x768ebF5226356278719cFF9781eb84942f221298",
+    value: ethers.utils.parseEther("5.01")
+  });
 
   /*
 
@@ -217,14 +255,11 @@ const main = async () => {
 
   */
 
-
   //const secondContract = await deploy("SecondContract")
 
   // const exampleToken = await deploy("ExampleToken")
   // const examplePriceOracle = await deploy("ExamplePriceOracle")
   // const smartContractWallet = await deploy("SmartContractWallet",[exampleToken.address,examplePriceOracle.address])
-
-
 
   /*
   //If you want to send value to an address from the deployer
@@ -235,14 +270,12 @@ const main = async () => {
   })
   */
 
-
   /*
   //If you want to send some ETH to a contract on deploy (make your constructor payable!)
   const yourContract = await deploy("YourContract", [], {
   value: ethers.utils.parseEther("0.05")
   });
   */
-
 
   /*
   //If you want to link a library into your contract:
@@ -251,7 +284,6 @@ const main = async () => {
    LibraryName: **LibraryAddress**
   });
   */
-
 };
 
 function sleep(ms) {
@@ -260,7 +292,7 @@ function sleep(ms) {
 
 main()
   .then(() => process.exit(0))
-  .catch((error) => {
+  .catch(error => {
     console.error(error);
     process.exit(1);
   });

@@ -9,6 +9,7 @@ packages/hardhat/*.txt
 packages/hardhat/artifacts
 packages/hardhat/deployments
 packages/react-app/src/contracts
+packages/react-app/src/contracts-*
 packages/hardhat/cache
 
 docker/**/data
@@ -30,6 +31,7 @@ build
 # misc
 .DS_Store
 .env*
+*.txt
 
 # debug
 npm-debug.log*

@@ -1,25 +1,47 @@
 const { ethers } = require("hardhat");
 const { use, expect } = require("chai");
 const { solidity } = require("ethereum-waffle");
+const { utils } = require("ethers");
 
 use(solidity);
 
-describe("My Dapp", function () {
+describe("My Dapp", function() {
   let myContract;
+  let accounts;
 
-  describe("YourContract", function () {
-    it("Should deploy YourContract", async function () {
-      const YourContract = await ethers.getContractFactory("YourContract");
+  before(async function() {
+    accounts = await ethers.getSigners();
+    // for(_i in accounts) {
+    //   const _b = await ethers.getDefaultProvider().getBalance(accounts[_i].address);
+    //   console.log('account, balance:',accounts[_i].address, utils.formatEther(_b));
+    // };
+    // console.log(ethers);
+  });
 
-      myContract = await YourContract.deploy();
+  describe("YourCollectible", function() {
+    it("Should deploy YourCollectible", async function() {
+      const YourCollectible = await ethers.getContractFactory(
+        "YourCollectible"
+      );
+
+      myContract = await YourCollectible.deploy();
+      const _a = await myContract.address;
+      const _o = await myContract.owner();
+      console.log("YourCollectible address", _a);
+      console.log("YourCollectible owner", _o);
     });
 
-    describe("setPurpose()", function () {
-      it("Should be able to set a new purpose", async function () {
-        const newPurpose = "Test Purpose";
+    describe("check fields()", function() {
+      it("check name", async function() {
+        const _n = await myContract.name();
+        // console.log(_n);
+        expect(_n).to.equal("YourCollectible");
+      });
 
-        await myContract.setPurpose(newPurpose);
-        expect(await myContract.purpose()).to.equal(newPurpose);
+      it("check symbol", async function() {
+        const _s = await myContract.symbol();
+        // console.log(_s);
+        expect(_s).to.equal("YCB");
       });
     });
   });

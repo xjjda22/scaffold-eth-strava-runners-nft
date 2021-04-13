@@ -7,9 +7,9 @@ export default function useExchangePrice(targetNetwork, mainnetProvider, pollTim
 
   const pollPrice = () => {
     async function getPrice() {
-      if(targetNetwork.price){
-        setPrice(targetNetwork.price)
-      }else{
+      if (targetNetwork.price) {
+        setPrice(targetNetwork.price);
+      } else {
         const DAI = new Token(
           mainnetProvider.network ? mainnetProvider.network.chainId : 1,
           "0x6B175474E89094C44Da98b954EedeAC495271d0F",
@@ -22,7 +22,7 @@ export default function useExchangePrice(targetNetwork, mainnetProvider, pollTim
     }
     getPrice();
   };
-  usePoller(pollPrice, pollTime || 9777);
+  usePoller(pollPrice, pollTime || 39777);
 
   return price;
 }
