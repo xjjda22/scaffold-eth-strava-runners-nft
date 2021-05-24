@@ -1,8 +1,14 @@
 /*@import '~antd/dist/antd.dark.css';*/
-/*@import url('https://fonts.googleapis.com/css2?family=Monoton&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=B612&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');*/
+/*@import url('https://fonts.googleapis.com/css2?family=Monoton&display=swap');*/
+/*@import url('https://fonts.googleapis.com/css2?family=B612&display=swap');*/
+/*@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');*/
 @import url('https://fonts.googleapis.com/css2?family=Overpass+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
+
+/*@font-face {
+  font-family: 'Overpass Mono';
+  src: local('Overpass Mono'), url(./fonts/Overpass_Mono/OverpassMono-Regular.ttf) format('truetype');
+}*/
 
 body{ 
   /*font-family: Andale Mono, monospace;
@@ -12,7 +18,7 @@ body{
   font-family: Monoton;
   font-family: 'B612', sans-serif;
   font-family: 'Open Sans', sans-serif;*/
-  font-family: 'Overpass Mono', sans-serif;
+  font-family: 'Overpass Mono', sans-serif,'Special Elite', cursive !important;
 }
 
 .App {

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { BrowserRouter, Switch, Route, Link } from "react-router-dom";
 import "antd/dist/antd.css";
-import { JsonRpcProvider, Web3Provider, StaticJsonRpcProvider } from "@ethersproject/providers";
+import { StaticJsonRpcProvider, JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 import "./App.css";
 import { Row, Col, Button, Menu, Alert, Input, List, Card, Switch as SwitchD, Space } from "antd";
 import Web3Modal from "web3modal";
@@ -16,6 +16,7 @@ import {
   useEventListener,
   useBalance,
   useExternalContractLoader,
+  useOnBlock,
 } from "./hooks";
 import {
   Header,
@@ -28,6 +29,7 @@ import {
   AddressInput,
   ThemeSwitch,
   StravaActivityMap,
+  StravaActivityChallenge,
 } from "./components";
 import { Transactor } from "./helpers";
 import { formatEther, parseEther } from "@ethersproject/units";
@@ -37,11 +39,10 @@ import { useThemeSwitcher } from "react-css-theme-switcher";
 import { INFURA_ID, DAI_ADDRESS, DAI_ABI, NETWORK, NETWORKS } from "./constants";
 import ReactJson from "react-json-view";
 
-import CanvasDraw from "react-canvas-draw";
 import LZ from "lz-string";
 
-let canvasDraw = CanvasDraw;
-canvasDraw.playableCanvas = [];
+// import {toUtf8Bytes} from "@ethersproject/strings";
+// let messageBytes = toUtf8Bytes("hello world");
 
 const { BufferList } = require("bl");
 // https://www.npmjs.com/package/ipfs-http-client
@@ -113,42 +114,39 @@ if (DEBUG) console.log("📡 Connecting to Mainnet Ethereum");
 // const mainnetProvider = new InfuraProvider("mainnet",INFURA_ID);
 //
 // attempt to connect to our own scaffold eth rpc and if that fails fall back to infura...
-// const scaffoldEthProvider = new JsonRpcProvider("https://rpc.scaffoldeth.io:48544");
-// const mainnetInfura = new JsonRpcProvider("https://mainnet.infura.io/v3/" + INFURA_ID);
+// Using StaticJsonRpcProvider as the chainId won't change see https://github.com/ethers-io/ethers.js/issues/901
+// const scaffoldEthProvider = new StaticJsonRpcProvider("https://rpc.scaffoldeth.io:48544")
+// const mainnetInfura = new StaticJsonRpcProvider("https://mainnet.infura.io/v3/" + INFURA_ID)
 // ( ⚠️ Getting "failed to meet quorum" errors? Check your INFURA_I
 
 // 🏠 Your local provider is usually pointed at your local blockchain
-// const localProviderUrl = targetNetwork.rpcUrl;
-// // as you deploy to other networks you can set REACT_APP_PROVIDER=https://dai.poa.network in packages/react-app/.env
-// const localProviderUrlFromEnv = process.env.REACT_APP_PROVIDER ? process.env.REACT_APP_PROVIDER : localProviderUrl;
-// if (DEBUG) console.log("🏠 Connecting to provider:", localProviderUrlFromEnv);
-// const localProvider = new JsonRpcProvider(localProviderUrlFromEnv);
+const localProviderUrl = targetNetwork.rpcUrl;
+// as you deploy to other networks you can set REACT_APP_PROVIDER=https://dai.poa.network in packages/react-app/.env
+const localProviderUrlFromEnv = process.env.REACT_APP_PROVIDER ? process.env.REACT_APP_PROVIDER : localProviderUrl;
+if (DEBUG) console.log("🏠 Connecting to provider:", localProviderUrlFromEnv);
+const localProvider = new StaticJsonRpcProvider(localProviderUrlFromEnv);
 
 // 🔭 block explorer URL
 const blockExplorer = targetNetwork.blockExplorer;
 
 function App(props) {
-  // const mainnetProvider = scaffoldEthProvider && scaffoldEthProvider._network ? scaffoldEthProvider : mainnetInfura;
-  // if (DEBUG) console.log("🌎 mainnetProvider", mainnetProvider);
+  // const mainnetProvider = (scaffoldEthProvider && scaffoldEthProvider._network) ? scaffoldEthProvider : mainnetInfura
 
   const [injectedProvider, setInjectedProvider] = useState();
   /* 💵 This hook will get the price of ETH from 🦄 Uniswap: */
   // const price = useExchangePrice(targetNetwork, mainnetProvider, process.env.REACT_APP_POLLING);
 
   /* 🔥 This hook will get the price of Gas from ⛽️ EtherGasStation */
-  const gasPrice = 5; //useGasPrice(targetNetwork, "fast", process.env.REACT_APP_POLLING);
+  const gasPrice = useGasPrice(targetNetwork, "fast", process.env.REACT_APP_POLLING);
   // Use your injected provider from 🦊 Metamask or if you don't have it then instantly generate a 🔥 burner wallet.
-  // const userProvider = useUserProvider(injectedProvider, localProvider);
-  const userProvider = useUserProvider(injectedProvider, null);
+  const userProvider = useUserProvider(injectedProvider, localProvider);
+  // const userProvider = useUserProvider(injectedProvider, null);
   const address = useUserAddress(userProvider);
   if (DEBUG) console.log("👩‍💼 selected address:", address);
 
   // You can warn the user if you would like them to be on a specific network
-  // let localChainId = localProvider && localProvider._network && localProvider._network.chainId;
-  // if (DEBUG) console.log("🏠 localChainId", localChainId);
-
+  let localChainId = localProvider && localProvider._network && localProvider._network.chainId;
   let selectedChainId = userProvider && userProvider._network && userProvider._network.chainId;
-  if (DEBUG) console.log("🕵🏻‍♂️ selectedChainId:", selectedChainId);
 
   // For more hooks, check out 🔗eth-hooks at: https://www.npmjs.com/package/eth-hooks
 
@@ -160,31 +158,30 @@ function App(props) {
 
   // 🏗 scaffold-eth is full of handy hooks like this one to get your balance:
   const yourLocalBalance = useBalance(userProvider, address, process.env.REACT_APP_POLLING);
-  if (DEBUG) console.log("💵 yourLocalBalance", yourLocalBalance ? formatEther(yourLocalBalance) : "...");
 
   // Just plug in different 🛰 providers to get your balance on different chains:
   // const yourMainnetBalance = useBalance(mainnetProvider, address);
-  // if (DEBUG) console.log("💵 yourMainnetBalance", yourMainnetBalance ? formatEther(yourMainnetBalance) : "...");
 
   // Load in your local 📝 contract and read a value from it:
   const readContracts = useContractLoader(userProvider);
-  if (DEBUG) console.log("📝 readContracts", readContracts);
 
   // If you want to make 🔐 write transactions to your contracts, use the userProvider:
   const writeContracts = useContractLoader(userProvider);
-  if (DEBUG) console.log("🔐 writeContracts", writeContracts);
 
   // EXTERNAL CONTRACT EXAMPLE:
   //
   // If you want to bring in the mainnet DAI contract it would look like:
-  // const mainnetDAIContract = useExternalContractLoader(mainnetProvider, DAI_ADDRESS, DAI_ABI);
-  // console.log("🌍 DAI contract on mainnet:", mainnetDAIContract);
-  //
+  // const mainnetDAIContract = useExternalContractLoader(mainnetProvider, DAI_ADDRESS, DAI_ABI)
+
+  // If you want to call a function on a new block
+  // useOnBlock(mainnetProvider, () => {
+  //   console.log(`⛓ A new mainnet block is here: ${mainnetProvider._lastBlockNumber}`)
+  // })
+
   // Then read your DAI balance like:
   // const myMainnetDAIBalance = useContractReader({ DAI: mainnetDAIContract }, "DAI", "balanceOf", [
   //   "0x34aA3F359A9D614239015126635CE7732c18fDF3",
   // ], process.env.REACT_APP_POLLING);
-  // console.log("🥇 myMainnetDAIBalance:", myMainnetDAIBalance);
 
   // keep track of a variable from the contract in the local React state:
   const balance = useContractReader(
@@ -194,7 +191,6 @@ function App(props) {
     [address],
     process.env.REACT_APP_POLLING,
   );
-  console.log("🤗 balance:", balance);
 
   //📟 Listen for broadcast events
   const transferEvents = useEventListener(readContracts, "YourCollectible", "Transfer", userProvider, 1);
@@ -255,30 +251,50 @@ function App(props) {
   console.log("🏷 Resolved austingriffith.eth as:",addressFromENS)
   */
 
+  //
+  // 🧫 DEBUG 👨🏻‍🔬
+  //
+  useEffect(() => {
+    // if(DEBUG && mainnetProvider && address && selectedChainId && yourLocalBalance && yourMainnetBalance && readContracts && writeContracts && mainnetDAIContract){
+    if (DEBUG && address && selectedChainId && yourLocalBalance && readContracts && writeContracts) {
+      console.log("_____________________________________ 🏗 scaffold-eth _____________________________________");
+      // console.log("🌎 mainnetProvider",mainnetProvider)
+      console.log("🏠 localChainId", localChainId);
+      console.log("👩‍💼 selected address:", address);
+      console.log("🕵🏻‍♂️ selectedChainId:", selectedChainId);
+      console.log("💵 yourLocalBalance", yourLocalBalance ? formatEther(yourLocalBalance) : "...");
+      // console.log("💵 yourMainnetBalance",yourMainnetBalance?formatEther(yourMainnetBalance):"...")
+      console.log("📝 readContracts", readContracts);
+      // console.log("🌍 DAI contract on mainnet:",mainnetDAIContract)
+      console.log("🔐 writeContracts", writeContracts);
+    }
+    // }, [mainnetProvider, address, selectedChainId, yourLocalBalance, yourMainnetBalance, readContracts, writeContracts, mainnetDAIContract])
+  }, [address, selectedChainId, yourLocalBalance, readContracts, writeContracts]);
+
   let networkDisplay = "";
-  // if (localChainId && selectedChainId && localChainId != selectedChainId) {
-  //   networkDisplay = (
-  //     <div style={{ zIndex: 2, position: "absolute", right: 0, top: 60, padding: 16 }}>
-  //       <Alert
-  //         message={"⚠️ Wrong Network"}
-  //         description={
-  //           <div>
-  //             You have <b>{NETWORK(selectedChainId).name}</b> selected and you need to be on{" "}
-  //             <b>{NETWORK(localChainId).name}</b>.
-  //           </div>
-  //         }
-  //         type="error"
-  //         closable={false}
-  //       />
-  //     </div>
-  //   );
-  // } else {
-  networkDisplay = (
-    <div style={{ zIndex: -1, position: "absolute", right: 154, top: 28, padding: 16, color: targetNetwork.color }}>
-      {targetNetwork.name}
-    </div>
-  );
-  // }
+  if (localChainId && selectedChainId && localChainId != selectedChainId) {
+    networkDisplay = (
+      <div style={{ zIndex: 2, position: "absolute", right: 0, top: 60, padding: 16 }}>
+        <Alert
+          message={"⚠️ Wrong Network"}
+          description={
+            <div>
+              You have <b>{NETWORK(selectedChainId).name}</b> selected and you need to be on{" "}
+              <b>{NETWORK(localChainId).name}</b>.
+            </div>
+          }
+          type="error"
+          closable={false}
+        />
+      </div>
+    );
+  } else {
+    networkDisplay = (
+      <div style={{ zIndex: -1, position: "absolute", right: 154, top: 28, padding: 16, color: targetNetwork.color }}>
+        {targetNetwork.name}
+      </div>
+    );
+  }
 
   const loadWeb3Modal = useCallback(async () => {
     const provider = await web3Modal.connect();
@@ -361,16 +377,6 @@ function App(props) {
                 YourCollectibles
               </Link>
             </Menu.Item>
-            <Menu.Item key="/transfers">
-              <Link
-                onClick={() => {
-                  setRoute("/transfers");
-                }}
-                to="/transfers"
-              >
-                Transfers
-              </Link>
-            </Menu.Item>
             <Menu.Item key="/ipfsup">
               <Link
                 onClick={() => {
@@ -402,7 +408,24 @@ function App(props) {
                 this <Contract/> component will automatically parse your ABI
                 and give you a form to interact with it locally
             */}
-            <StravaActivityMap address={address} tx={tx} writeContracts={writeContracts} />
+            {/*
+              <StravaActivityChallenge 
+                address={address} 
+                tx={tx} 
+                provider={userProvider} 
+                writeContracts={writeContracts} 
+                readContracts={readContracts} 
+              />
+            */}
+            {
+              <StravaActivityMap
+                address={address}
+                tx={tx}
+                provider={userProvider}
+                writeContracts={writeContracts}
+                readContracts={readContracts}
+              />
+            }
             <div style={{ width: 640, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
               {/*
               <List
@@ -459,6 +482,7 @@ function App(props) {
             */}
 
               <List
+                header={<div>Mints</div>}
                 bordered
                 dataSource={yourCollectibles}
                 renderItem={item => {
@@ -479,21 +503,6 @@ function App(props) {
                           {/*item.image && 
                             (<img src={item.image} style={{width:500, height:500}} />)
                           */}
-                          <CanvasDraw
-                            ref={_c => (canvasDraw.playableCanvas[id] = _c)}
-                            saveData={item.savedDrawing}
-                            imgSrc={item.savedDrawingBack}
-                            bm={item.bm}
-                            stats={item.stats}
-                            profile={item.profile}
-                            hideInterface={true}
-                            disabled={true}
-                            hideGrid={true}
-                            canvasWidth={500}
-                            canvasHeight={500}
-                            loadTimeOffset={3}
-                            style={{ margin: "auto", marginTop: 10 }}
-                          />
                         </div>
                         <div style={{ width: 500, height: "100%", margin: "auto", marginTop: 10, paddingBottom: 10 }}>
                           owner:{" "}
@@ -519,16 +528,6 @@ function App(props) {
                             <Button
                               type={"primary"}
                               onClick={() => {
-                                console.log("playableCanvas", canvasDraw.playableCanvas[id]);
-                                let _dataURL = item.savedDrawing;
-                                canvasDraw.playableCanvas[id].loadSaveData(_dataURL, false);
-                              }}
-                            >
-                              Play
-                            </Button>
-                            <Button
-                              type={"primary"}
-                              onClick={() => {
                                 console.log("writeContracts", writeContracts);
                                 tx(writeContracts.YourCollectible.transferFrom(address, transferToAddresses[id], id));
                               }}
@@ -542,36 +541,31 @@ function App(props) {
                   );
                 }}
               />
-            </div>
-          </Route>
 
-          <Route path="/transfers">
-            {showBroswerRouter && (
-              <div style={{ width: 600, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
-                <List
-                  bordered
-                  dataSource={transferEvents}
-                  renderItem={item => {
-                    return (
-                      <List.Item key={item[0] + "_" + item[1] + "_" + item.blockNumber + "_" + item[2].toNumber()}>
-                        <span style={{ fontSize: 16, marginRight: 8 }}>#{item[2].toNumber()}</span>
-                        <Address
-                          address={item[0]}
-                          // ensProvider={mainnetProvider}
-                          fontSize={16}
-                        />{" "}
-                        =>
-                        <Address
-                          address={item[1]}
-                          // ensProvider={mainnetProvider}
-                          fontSize={16}
-                        />
-                      </List.Item>
-                    );
-                  }}
-                />
-              </div>
-            )}
+              <List
+                header={<div>Transfer Events</div>}
+                bordered
+                dataSource={transferEvents}
+                renderItem={item => {
+                  return (
+                    <List.Item key={item[0] + "_" + item[1] + "_" + item.blockNumber + "_" + item[2].toNumber()}>
+                      <span style={{ fontSize: 16, marginRight: 8 }}>#{item[2].toNumber()}</span>
+                      <Address
+                        address={item[0]}
+                        // ensProvider={mainnetProvider}
+                        fontSize={16}
+                      />{" "}
+                      =>
+                      <Address
+                        address={item[1]}
+                        // ensProvider={mainnetProvider}
+                        fontSize={16}
+                      />
+                    </List.Item>
+                  );
+                }}
+              />
+            </div>
           </Route>
 
           <Route path="/ipfsup">
@@ -658,13 +652,23 @@ function App(props) {
           <Route path="/debugcontracts">
             {showBroswerRouter && (
               <Contract
-                name="YourCollectible"
+                name="YourChallenge"
                 signer={userProvider && userProvider.getSigner()}
                 provider={userProvider}
                 address={address}
                 blockExplorer={blockExplorer}
               />
             )}
+            {/*showBroswerRouter && (
+              
+              <Contract
+                name="YourCollectible"
+                signer={userProvider && userProvider.getSigner()}
+                provider={userProvider}
+                address={address}
+                blockExplorer={blockExplorer}
+              />
+            )*/}
           </Route>
         </Switch>
       </BrowserRouter>
@@ -762,6 +766,7 @@ const logoutOfWeb3Modal = async () => {
 };
 
 window.ethereum &&
+  web3Modal.cachedProvider &&
   window.ethereum.on("chainChanged", chainId => {
     setTimeout(() => {
       window.location.reload();
@@ -769,10 +774,11 @@ window.ethereum &&
   });
 
 window.ethereum &&
-  window.ethereum.on("accountsChanged", chainId => {
-    setTimeout(() => {
-      window.location.reload();
-    }, 1);
+  window.ethereum.on("accountsChanged", accounts => {
+    web3Modal.cachedProvider &&
+      setTimeout(() => {
+        window.location.reload();
+      }, 1);
   });
 
 export default App;

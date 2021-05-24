@@ -37,199 +37,199 @@ const main = async () => {
   // Uploading godzilla...
   // Minting godzilla with IPFS hash (QmWncWK3cherDbRgkzzqZRfxAaShti29MTEMpFUmEcysXi)
 
-  // const buffalo = {
-  //   description: "It's actually a bison?",
-  //   external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
-  //   image: "https://austingriffith.com/images/paintings/buffalo.jpg",
-  //   name: "Buffalo",
-  //   attributes: [
-  //     {
-  //       trait_type: "BackgroundColor",
-  //       value: "green"
-  //     },
-  //     {
-  //       trait_type: "Eyes",
-  //       value: "googly"
-  //     },
-  //     {
-  //       trait_type: "Stamina",
-  //       value: 42
-  //     }
-  //   ]
-  // };
-  // console.log("Uploading buffalo...");
-  // // const uploaded = await ipfs.add(JSON.stringify(buffalo))
+  const buffalo = {
+    description: "It's actually a bison?",
+    external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
+    image: "https://austingriffith.com/images/paintings/buffalo.jpg",
+    name: "Buffalo",
+    attributes: [
+      {
+        trait_type: "BackgroundColor",
+        value: "green"
+      },
+      {
+        trait_type: "Eyes",
+        value: "googly"
+      },
+      {
+        trait_type: "Stamina",
+        value: 42
+      }
+    ]
+  };
+  console.log("Uploading buffalo...");
+  // const uploaded = await ipfs.add(JSON.stringify(buffalo))
 
-  // // console.log("Minting buffalo with IPFS hash ("+uploaded.path+")")
-  // // await yourCollectible.mintItem(toAddress,uploaded.path,{gasLimit:400000})
-  // await yourCollectible.mintItem(
-  //   toAddress,
-  //   "QmfVMAmNM1kDEBYrC2TPzQDoCRFH6F5tE1e9Mr4FkkR5Xr",
-  //   { gasLimit: 400000 }
-  // );
+  // console.log("Minting buffalo with IPFS hash ("+uploaded.path+")")
+  // await yourCollectible.mintItem(toAddress,uploaded.path,{gasLimit:400000})
+  await yourCollectible.mintItem(
+    toAddress,
+    "QmfVMAmNM1kDEBYrC2TPzQDoCRFH6F5tE1e9Mr4FkkR5Xr",
+    { gasLimit: 400000 }
+  );
 
-  // await sleep(delayMS);
+  await sleep(delayMS);
 
-  // const zebra = {
-  //   description: "What is it so worried about?",
-  //   external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
-  //   image: "https://austingriffith.com/images/paintings/zebra.jpg",
-  //   name: "Zebra",
-  //   attributes: [
-  //     {
-  //       trait_type: "BackgroundColor",
-  //       value: "blue"
-  //     },
-  //     {
-  //       trait_type: "Eyes",
-  //       value: "googly"
-  //     },
-  //     {
-  //       trait_type: "Stamina",
-  //       value: 38
-  //     }
-  //   ]
-  // };
-  // console.log("Uploading zebra...");
-  // // const uploadedzebra = await ipfs.add(JSON.stringify(zebra))
+  const zebra = {
+    description: "What is it so worried about?",
+    external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
+    image: "https://austingriffith.com/images/paintings/zebra.jpg",
+    name: "Zebra",
+    attributes: [
+      {
+        trait_type: "BackgroundColor",
+        value: "blue"
+      },
+      {
+        trait_type: "Eyes",
+        value: "googly"
+      },
+      {
+        trait_type: "Stamina",
+        value: 38
+      }
+    ]
+  };
+  console.log("Uploading zebra...");
+  // const uploadedzebra = await ipfs.add(JSON.stringify(zebra))
 
-  // // console.log("Minting zebra with IPFS hash ("+uploadedzebra.path+")")
-  // // await yourCollectible.mintItem(toAddress,uploadedzebra.path,{gasLimit:400000})
-  // await yourCollectible.mintItem(
-  //   toAddress,
-  //   "QmVHi3c4qkZcH3cJynzDXRm5n7dzc9R9TUtUcfnWQvhdcw",
-  //   { gasLimit: 400000 }
-  // );
+  // console.log("Minting zebra with IPFS hash ("+uploadedzebra.path+")")
+  // await yourCollectible.mintItem(toAddress,uploadedzebra.path,{gasLimit:400000})
+  await yourCollectible.mintItem(
+    toAddress,
+    "QmVHi3c4qkZcH3cJynzDXRm5n7dzc9R9TUtUcfnWQvhdcw",
+    { gasLimit: 400000 }
+  );
 
-  // await sleep(delayMS);
+  await sleep(delayMS);
 
-  // const rhino = {
-  //   description: "What a horn!",
-  //   external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
-  //   image: "https://austingriffith.com/images/paintings/rhino.jpg",
-  //   name: "Rhino",
-  //   attributes: [
-  //     {
-  //       trait_type: "BackgroundColor",
-  //       value: "pink"
-  //     },
-  //     {
-  //       trait_type: "Eyes",
-  //       value: "googly"
-  //     },
-  //     {
-  //       trait_type: "Stamina",
-  //       value: 22
-  //     }
-  //   ]
-  // };
-  // console.log("Uploading rhino...");
-  // // const uploadedrhino = await ipfs.add(JSON.stringify(rhino))
+  const rhino = {
+    description: "What a horn!",
+    external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
+    image: "https://austingriffith.com/images/paintings/rhino.jpg",
+    name: "Rhino",
+    attributes: [
+      {
+        trait_type: "BackgroundColor",
+        value: "pink"
+      },
+      {
+        trait_type: "Eyes",
+        value: "googly"
+      },
+      {
+        trait_type: "Stamina",
+        value: 22
+      }
+    ]
+  };
+  console.log("Uploading rhino...");
+  // const uploadedrhino = await ipfs.add(JSON.stringify(rhino))
 
-  // // console.log("Minting rhino with IPFS hash ("+uploadedrhino.path+")")
-  // // await yourCollectible.mintItem(toAddress,uploadedrhino.path,{gasLimit:400000})
-  // await yourCollectible.mintItem(
-  //   toAddress,
-  //   "QmcvcUaKf6JyCXhLD1by6hJXNruPQGs3kkLg2W1xr7nF1j",
-  //   { gasLimit: 400000 }
-  // );
+  // console.log("Minting rhino with IPFS hash ("+uploadedrhino.path+")")
+  // await yourCollectible.mintItem(toAddress,uploadedrhino.path,{gasLimit:400000})
+  await yourCollectible.mintItem(
+    toAddress,
+    "QmcvcUaKf6JyCXhLD1by6hJXNruPQGs3kkLg2W1xr7nF1j",
+    { gasLimit: 400000 }
+  );
 
-  // await sleep(delayMS);
+  await sleep(delayMS);
 
-  // const fish = {
-  //   description: "Is that an underbyte?",
-  //   external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
-  //   image: "https://austingriffith.com/images/paintings/fish.jpg",
-  //   name: "Fish",
-  //   attributes: [
-  //     {
-  //       trait_type: "BackgroundColor",
-  //       value: "blue"
-  //     },
-  //     {
-  //       trait_type: "Eyes",
-  //       value: "googly"
-  //     },
-  //     {
-  //       trait_type: "Stamina",
-  //       value: 15
-  //     }
-  //   ]
-  // };
-  // console.log("Uploading fish...");
-  // // const uploadedfish = await ipfs.add(JSON.stringify(fish))
+  const fish = {
+    description: "Is that an underbyte?",
+    external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
+    image: "https://austingriffith.com/images/paintings/fish.jpg",
+    name: "Fish",
+    attributes: [
+      {
+        trait_type: "BackgroundColor",
+        value: "blue"
+      },
+      {
+        trait_type: "Eyes",
+        value: "googly"
+      },
+      {
+        trait_type: "Stamina",
+        value: 15
+      }
+    ]
+  };
+  console.log("Uploading fish...");
+  // const uploadedfish = await ipfs.add(JSON.stringify(fish))
 
-  // // console.log("Minting fish with IPFS hash ("+uploadedfish.path+")")
-  // // await yourCollectible.mintItem(toAddress,uploadedfish.path,{gasLimit:400000})
-  // await yourCollectible.mintItem(
-  //   toAddress,
-  //   "QmZUaKqR7Sd2iJHABbRmAN94nKqEjjj9GdM1LR66UDKUhe",
-  //   { gasLimit: 400000 }
-  // );
+  // console.log("Minting fish with IPFS hash ("+uploadedfish.path+")")
+  // await yourCollectible.mintItem(toAddress,uploadedfish.path,{gasLimit:400000})
+  await yourCollectible.mintItem(
+    toAddress,
+    "QmZUaKqR7Sd2iJHABbRmAN94nKqEjjj9GdM1LR66UDKUhe",
+    { gasLimit: 400000 }
+  );
 
-  // await sleep(delayMS);
+  await sleep(delayMS);
 
-  // const flamingo = {
-  //   description: "So delicate.",
-  //   external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
-  //   image: "https://austingriffith.com/images/paintings/flamingo.jpg",
-  //   name: "Flamingo",
-  //   attributes: [
-  //     {
-  //       trait_type: "BackgroundColor",
-  //       value: "black"
-  //     },
-  //     {
-  //       trait_type: "Eyes",
-  //       value: "googly"
-  //     },
-  //     {
-  //       trait_type: "Stamina",
-  //       value: 6
-  //     }
-  //   ]
-  // };
-  // console.log("Uploading flamingo...");
-  // // const uploadedflamingo = await ipfs.add(JSON.stringify(flamingo))
+  const flamingo = {
+    description: "So delicate.",
+    external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
+    image: "https://austingriffith.com/images/paintings/flamingo.jpg",
+    name: "Flamingo",
+    attributes: [
+      {
+        trait_type: "BackgroundColor",
+        value: "black"
+      },
+      {
+        trait_type: "Eyes",
+        value: "googly"
+      },
+      {
+        trait_type: "Stamina",
+        value: 6
+      }
+    ]
+  };
+  console.log("Uploading flamingo...");
+  // const uploadedflamingo = await ipfs.add(JSON.stringify(flamingo))
 
-  // // console.log("Minting flamingo with IPFS hash ("+uploadedflamingo.path+")")
-  // // await yourCollectible.mintItem(toAddress,uploadedflamingo.path,{gasLimit:400000})
-  // await yourCollectible.mintItem(
-  //   toAddress,
-  //   "QmW95YgCMVFSfA4G6tNP86BnkTBVkQBY6bUYYb8Cqtpr6m",
-  //   { gasLimit: 400000 }
-  // );
+  // console.log("Minting flamingo with IPFS hash ("+uploadedflamingo.path+")")
+  // await yourCollectible.mintItem(toAddress,uploadedflamingo.path,{gasLimit:400000})
+  await yourCollectible.mintItem(
+    toAddress,
+    "QmW95YgCMVFSfA4G6tNP86BnkTBVkQBY6bUYYb8Cqtpr6m",
+    { gasLimit: 400000 }
+  );
 
-  // const godzilla = {
-  //   description: "Raaaar!",
-  //   external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
-  //   image: "https://austingriffith.com/images/paintings/godzilla.jpg",
-  //   name: "Godzilla",
-  //   attributes: [
-  //     {
-  //       trait_type: "BackgroundColor",
-  //       value: "orange"
-  //     },
-  //     {
-  //       trait_type: "Eyes",
-  //       value: "googly"
-  //     },
-  //     {
-  //       trait_type: "Stamina",
-  //       value: 99
-  //     }
-  //   ]
-  // };
-  // console.log("Uploading godzilla...");
-  // // const uploadedgodzilla = await ipfs.add(JSON.stringify(godzilla))
+  const godzilla = {
+    description: "Raaaar!",
+    external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
+    image: "https://austingriffith.com/images/paintings/godzilla.jpg",
+    name: "Godzilla",
+    attributes: [
+      {
+        trait_type: "BackgroundColor",
+        value: "orange"
+      },
+      {
+        trait_type: "Eyes",
+        value: "googly"
+      },
+      {
+        trait_type: "Stamina",
+        value: 99
+      }
+    ]
+  };
+  console.log("Uploading godzilla...");
+  // const uploadedgodzilla = await ipfs.add(JSON.stringify(godzilla))
 
-  // // console.log("Minting godzilla with IPFS hash ("+uploadedgodzilla.path+")")
-  // // await yourCollectible.mintItem(toAddress,uploadedgodzilla.path,{gasLimit:400000})
-  // await yourCollectible.mintItem(
-  //   toAddress,
-  //   "QmWncWK3cherDbRgkzzqZRfxAaShti29MTEMpFUmEcysXi",
-  //   { gasLimit: 400000 }
-  // );
+  // console.log("Minting godzilla with IPFS hash ("+uploadedgodzilla.path+")")
+  // await yourCollectible.mintItem(toAddress,uploadedgodzilla.path,{gasLimit:400000})
+  await yourCollectible.mintItem(
+    toAddress,
+    "QmWncWK3cherDbRgkzzqZRfxAaShti29MTEMpFUmEcysXi",
+    { gasLimit: 400000 }
+  );
 
   await sleep(delayMS);
 

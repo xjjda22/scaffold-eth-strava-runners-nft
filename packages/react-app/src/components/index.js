@@ -17,3 +17,4 @@ export { default as BytesStringInput } from "./BytesStringInput";
 export { default as Swap } from "./Swap";
 export { default as ThemeSwitch } from "./ThemeSwitch";
 export { default as StravaActivityMap } from "./StravaActivityMap";
+export { default as StravaActivityChallenge } from "./StravaActivityChallenge";

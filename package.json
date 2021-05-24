@@ -48,8 +48,7 @@
     "deploy-and-graph": "yarn deploy && yarn graph-ship-local",
     "mint": "yarn workspace @scaffold-eth/hardhat mint",
     "theme": "yarn workspace @scaffold-eth/react-app theme",
-    "watch-theme": "yarn workspace @scaffold-eth/react-app watch",
-    "prettier": "prettier --write \"**/*.{js,jsx}\""
+    "watch-theme": "yarn workspace @scaffold-eth/react-app watch"
   },
   "workspaces": {
     "packages": [
