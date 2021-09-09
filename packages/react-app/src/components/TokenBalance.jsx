@@ -1,12 +1,13 @@
+// import { useTokenBalance } from "eth-hooks";
 import React, { useState } from "react";
-import { formatEther } from "@ethersproject/units";
-import { useTokenBalance } from "eth-hooks";
+
+import { utils } from "ethers";
 
 export default function TokenBalance(props) {
   const [dollarMode, setDollarMode] = useState(true);
 
   const tokenContract = props.contracts && props.contracts[props.name];
-  const balance = useTokenBalance(tokenContract, props.address, 1777);
+  const balance = 0;//useTokenBalance(tokenContract, props.address, 1777);
 
   let floatBalance = parseFloat("0.00");
 
@@ -17,7 +18,7 @@ export default function TokenBalance(props) {
   }
 
   if (usingBalance) {
-    const etherBalance = formatEther(usingBalance);
+    const etherBalance = utils.formatEther(usingBalance);
     parseFloat(etherBalance).toFixed(2);
     floatBalance = parseFloat(etherBalance);
   }

@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
-import usePoller from "./Poller";
+import { useEffect, useState } from "react";
 import useOnBlock from "./OnBlock";
-import { Provider } from "@ethersproject/providers";
+import usePoller from "./Poller";
 
 const DEBUG = false;
 
@@ -33,6 +32,8 @@ export default function useContractReader(contracts, contractName, functionName,
   }
 
   const [value, setValue] = useState();
+  const [tried, setTried] = useState(false);
+
   useEffect(() => {
     if (typeof onChange === "function") {
       setTimeout(onChange.bind(this, value), 1);
@@ -45,6 +46,7 @@ export default function useContractReader(contracts, contractName, functionName,
       if (DEBUG) console.log("CALLING ", contractName, functionName, "with args", args);
       if (args && args.length > 0) {
         newValue = await contracts[contractName][functionName](...args);
+        setTried(true);
         if (DEBUG)
           console.log("contractName", contractName, "functionName", functionName, "args", args, "RESULT:", newValue);
       } else {
@@ -80,6 +82,10 @@ export default function useContractReader(contracts, contractName, functionName,
     adjustPollTime,
     contracts && contracts[contractName],
   );
+
+  if (tried === false && contracts && contracts[contractName]) {
+    updateValue();
+  }
 
   return value;
 }

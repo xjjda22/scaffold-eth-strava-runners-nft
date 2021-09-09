@@ -1,14 +1,14 @@
-import React from "react";
 import { Button } from "antd";
+import React from "react";
+import { useThemeSwitcher } from "react-css-theme-switcher";
 import Address from "./Address";
 import Balance from "./Balance";
 import Wallet from "./Wallet";
-import { useThemeSwitcher } from "react-css-theme-switcher";
 
 /*
   ~ What it does? ~
 
-  Displays an Address, Balance, and Wallet as one Account component, 
+  Displays an Address, Balance, and Wallet as one Account component,
   also allows users to log in to existing accounts and log out
 
   ~ How can I use? ~
@@ -26,7 +26,7 @@ import { useThemeSwitcher } from "react-css-theme-switcher";
   />
 
   ~ Features ~
-  
+
   - Provide address={address} and get balance corresponding to the given address
   - Provide localProvider={localProvider} to access balance on local network
   - Provide userProvider={userProvider} to display a wallet
@@ -72,7 +72,7 @@ export default function Account({
           style={{ verticalAlign: "top", marginLeft: 8, marginTop: 4 }}
           shape="round"
           size="large"
-          /*type={minimized ? "default" : "primary"}     too many people just defaulting to MM and having a bad time*/
+          /* type={minimized ? "default" : "primary"}     too many people just defaulting to MM and having a bad time */
           onClick={loadWeb3Modal}
         >
           connect
@@ -98,7 +98,7 @@ export default function Account({
         provider={userProvider}
         ensProvider={mainnetProvider}
         price={price}
-        color={currentTheme == "light" ? "#1890ff" : "#2caad9"}
+        color={currentTheme === "light" ? "#1890ff" : "#2caad9"}
       />
     </span>
   );

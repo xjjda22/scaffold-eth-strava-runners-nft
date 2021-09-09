@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
 import { Input } from "antd";
+import React, { useEffect, useState } from "react";
+
 const { utils, constants } = require("ethers");
 
 /*
@@ -42,7 +43,7 @@ export default function BytesStringInput(props) {
           if (mode === "STRING") {
             setMode("BYTES32");
             if (!utils.isHexString(currentValue)) {
-              /* in case user enters invalid bytes32 number, 
+              /* in case user enters invalid bytes32 number,
                    it considers it as string and converts to bytes32 */
               const changedValue = utils.formatBytes32String(currentValue);
               setDisplay(changedValue);
@@ -86,8 +87,8 @@ export default function BytesStringInput(props) {
       onChange={async e => {
         const newValue = e.target.value;
         if (mode === "STRING") {
-          //const ethValue = parseFloat(newValue) / props.price;
-          //setValue(ethValue);
+          // const ethValue = parseFloat(newValue) / props.price;
+          // setValue(ethValue);
           if (typeof props.onChange === "function") {
             props.onChange(utils.formatBytes32String(newValue));
           }

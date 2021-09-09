@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 
 // helper hook to call a function regularly in time intervals
-let DEBUG = false;
+const DEBUG = false;
 
 export default function useOnBlock(provider, fn, args) {
   const savedCallback = useRef();

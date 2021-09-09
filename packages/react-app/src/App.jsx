@@ -1,97 +1,46 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { BrowserRouter, Switch, Route, Link } from "react-router-dom";
+import { Row, Col, Layout, Card, Space, Divider, Radio, Input, Button, Table, Alert, List } from "antd";
 import "antd/dist/antd.css";
-import { StaticJsonRpcProvider, JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 import "./App.css";
-import { Row, Col, Button, Menu, Alert, Input, List, Card, Switch as SwitchD, Space } from "antd";
-import Web3Modal from "web3modal";
-import WalletConnectProvider from "@walletconnect/web3-provider";
-import { useUserAddress } from "eth-hooks";
-import {
-  useExchangePrice,
-  useGasPrice,
+import React, { useCallback, useEffect, useState } from "react";
+// import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
+import axios from "axios";
+
+import { 
+  Address, 
+  // AddressInput, 
+  HeaderSt, 
+  StravaActivityMap 
+} from "./components";
+import { 
   useUserProvider,
   useContractLoader,
   useContractReader,
   useEventListener,
-  useBalance,
-  useExternalContractLoader,
-  useOnBlock,
+  // useBalance,
+  useOnBlock, 
+  usePoller 
 } from "./hooks";
-import {
-  Header,
-  Account,
-  Faucet,
-  Ramp,
-  Contract,
-  GasGauge,
-  Address,
-  AddressInput,
-  ThemeSwitch,
-  StravaActivityMap,
-  StravaActivityChallenge,
-} from "./components";
+import { useUserAddress } from "eth-hooks";
 import { Transactor } from "./helpers";
-import { formatEther, parseEther } from "@ethersproject/units";
-//import Hints from "./Hints";
-import { Hints, ExampleUI, Subgraph } from "./views";
-import { useThemeSwitcher } from "react-css-theme-switcher";
-import { INFURA_ID, DAI_ADDRESS, DAI_ABI, NETWORK, NETWORKS } from "./constants";
-import ReactJson from "react-json-view";
-
+import Web3Modal from "web3modal";
+import WalletConnectProvider from "@walletconnect/web3-provider";
 import LZ from "lz-string";
 
-// import {toUtf8Bytes} from "@ethersproject/strings";
-// let messageBytes = toUtf8Bytes("hello world");
+import { INFURA_ID, NETWORK, NETWORKS } from "./constants";
 
+const { ethers } = require("ethers");
 const { BufferList } = require("bl");
-// https://www.npmjs.com/package/ipfs-http-client
 const ipfsAPI = require("ipfs-http-client");
-const ipfs = ipfsAPI({ host: "ipfs.infura.io", port: "5001", protocol: "https" });
 
-/*
-    Welcome to 🏗 scaffold-eth !
-
-    Code:
-    https://github.com/austintgriffith/scaffold-eth
-
-    Support:
-    https://t.me/joinchat/KByvmRe5wkR-8F_zz6AjpA
-    or DM @austingriffith on twitter or telegram
-
-    You should get your own Infura.io ID and put it in `constants.js`
-    (this is your connection to the main Ethereum network for ENS etc.)
-
-
-    🌏 EXTERNAL CONTRACTS:
-    You can also bring in contract artifacts in `constants.js`
-    (and then use the `useExternalContractLoader()` hook!)
-*/
-
-/// 📡 What chain are your contracts deployed to?
-const targetNetwork = NETWORKS["localhost"]; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
+const { Header, Footer, Content } = Layout;
 
 // 😬 Sorry for all the console logging
-const DEBUG = true;
+// const DEBUG = true;
 const showBroswerRouter = true;
 
-//EXAMPLE STARTING JSON:
-const STARTING_JSON = {
-  description: "It's actually a bison?",
-  external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
-  image: "https://austingriffith.com/images/paintings/buffalo.jpg",
-  name: "Buffalo",
-  attributes: [
-    {
-      trait_type: "BackgroundColor",
-      value: "green",
-    },
-    {
-      trait_type: "Eyes",
-      value: "googly",
-    },
-  ],
-};
+const targetNetwork = NETWORKS["localhost"]; 
+const localProviderUrl = targetNetwork.rpcUrl;
+const ipfs = ipfsAPI({ host: "ipfs.infura.io", port: "5001", protocol: "https" });
 
 //helper function to "Get" from IPFS
 // you usually go content.toString() after this...
@@ -108,197 +57,114 @@ const getFromIPFS = async hashToGet => {
   }
 };
 
-// 🛰 providers
-if (DEBUG) console.log("📡 Connecting to Mainnet Ethereum");
-// const mainnetProvider = getDefaultProvider("mainnet", { infura: INFURA_ID, etherscan: ETHERSCAN_KEY, quorum: 1 });
-// const mainnetProvider = new InfuraProvider("mainnet",INFURA_ID);
-//
-// attempt to connect to our own scaffold eth rpc and if that fails fall back to infura...
-// Using StaticJsonRpcProvider as the chainId won't change see https://github.com/ethers-io/ethers.js/issues/901
-// const scaffoldEthProvider = new StaticJsonRpcProvider("https://rpc.scaffoldeth.io:48544")
-// const mainnetInfura = new StaticJsonRpcProvider("https://mainnet.infura.io/v3/" + INFURA_ID)
-// ( ⚠️ Getting "failed to meet quorum" errors? Check your INFURA_I
-
-// 🏠 Your local provider is usually pointed at your local blockchain
-const localProviderUrl = targetNetwork.rpcUrl;
-// as you deploy to other networks you can set REACT_APP_PROVIDER=https://dai.poa.network in packages/react-app/.env
-const localProviderUrlFromEnv = process.env.REACT_APP_PROVIDER ? process.env.REACT_APP_PROVIDER : localProviderUrl;
-if (DEBUG) console.log("🏠 Connecting to provider:", localProviderUrlFromEnv);
-const localProvider = new StaticJsonRpcProvider(localProviderUrlFromEnv);
-
-// 🔭 block explorer URL
-const blockExplorer = targetNetwork.blockExplorer;
+const fromWei = i => {
+  return i / 10 ** 18;
+};
+const fromGWei = i => {
+  return i / 10 ** 9;
+};
+const toGWei = i => {
+  return i * 10 ** 9;
+};
+const localProvider = new ethers.providers.StaticJsonRpcProvider(localProviderUrl);
+const mainnetInfura = new ethers.providers.StaticJsonRpcProvider("https://mainnet.infura.io/v3/" + INFURA_ID);
 
 function App(props) {
-  // const mainnetProvider = (scaffoldEthProvider && scaffoldEthProvider._network) ? scaffoldEthProvider : mainnetInfura
+  const mainnetProvider = mainnetInfura;
 
   const [injectedProvider, setInjectedProvider] = useState();
-  /* 💵 This hook will get the price of ETH from 🦄 Uniswap: */
-  // const price = useExchangePrice(targetNetwork, mainnetProvider, process.env.REACT_APP_POLLING);
 
-  /* 🔥 This hook will get the price of Gas from ⛽️ EtherGasStation */
-  const gasPrice = useGasPrice(targetNetwork, "fast", process.env.REACT_APP_POLLING);
-  // Use your injected provider from 🦊 Metamask or if you don't have it then instantly generate a 🔥 burner wallet.
+  const [gasPrices, setGasPrices] = useState({});
+  const [gas, setGas] = useState(0);
+  const [gasEth, setGasEth] = useState(0);
+  const [gasUsd, setGasUsd] = useState(0);
+  const [gasLimit, setGasLimit] = useState(30000);
+  const [ethPrice, setEthPrice] = useState(0);
+
+  const [blockNum, setBlockNum] = useState(0);
+  const [Loading, setLoading] = useState(0);
+
+  const [transferToAddresses, setTransferToAddresses] = useState({});
+  const [yourCollectibles, setYourCollectibles] = useState();
+
   const userProvider = useUserProvider(injectedProvider, localProvider);
-  // const userProvider = useUserProvider(injectedProvider, null);
   const address = useUserAddress(userProvider);
-  if (DEBUG) console.log("👩‍💼 selected address:", address);
+  const tx = Transactor(userProvider, gas);
+  const faucetTx = Transactor(userProvider, gas);
 
-  // You can warn the user if you would like them to be on a specific network
-  let localChainId = localProvider && localProvider._network && localProvider._network.chainId;
-  let selectedChainId = userProvider && userProvider._network && userProvider._network.chainId;
-
-  // For more hooks, check out 🔗eth-hooks at: https://www.npmjs.com/package/eth-hooks
-
-  // The transactor wraps transactions and provides notificiations
-  const tx = Transactor(userProvider, gasPrice);
-
-  // Faucet Tx can be used to send funds from the faucet
-  const faucetTx = Transactor(userProvider, gasPrice);
-
-  // 🏗 scaffold-eth is full of handy hooks like this one to get your balance:
-  const yourLocalBalance = useBalance(userProvider, address, process.env.REACT_APP_POLLING);
-
-  // Just plug in different 🛰 providers to get your balance on different chains:
-  // const yourMainnetBalance = useBalance(mainnetProvider, address);
-
-  // Load in your local 📝 contract and read a value from it:
   const readContracts = useContractLoader(userProvider);
-
-  // If you want to make 🔐 write transactions to your contracts, use the userProvider:
   const writeContracts = useContractLoader(userProvider);
 
-  // EXTERNAL CONTRACT EXAMPLE:
-  //
-  // If you want to bring in the mainnet DAI contract it would look like:
-  // const mainnetDAIContract = useExternalContractLoader(mainnetProvider, DAI_ADDRESS, DAI_ABI)
-
-  // If you want to call a function on a new block
-  // useOnBlock(mainnetProvider, () => {
-  //   console.log(`⛓ A new mainnet block is here: ${mainnetProvider._lastBlockNumber}`)
-  // })
-
-  // Then read your DAI balance like:
-  // const myMainnetDAIBalance = useContractReader({ DAI: mainnetDAIContract }, "DAI", "balanceOf", [
-  //   "0x34aA3F359A9D614239015126635CE7732c18fDF3",
-  // ], process.env.REACT_APP_POLLING);
-
-  // keep track of a variable from the contract in the local React state:
-  const balance = useContractReader(
-    readContracts,
-    "YourCollectible",
-    "balanceOf",
-    [address],
-    process.env.REACT_APP_POLLING,
-  );
+  //   // keep track of a variable from the contract in the local React state:
+  // const balance = useContractReader(
+  //   readContracts,
+  //   "YourCollectible",
+  //   "balanceOf",
+  //   [address],
+  //   process.env.REACT_APP_POLLING,
+  // );
 
   //📟 Listen for broadcast events
   const transferEvents = useEventListener(readContracts, "YourCollectible", "Transfer", userProvider, 1);
-  console.log("📟 Transfer events:", transferEvents);
+  // console.log("📟 Transfer events:", transferEvents);
 
-  //
-  // 🧠 This effect will update yourCollectibles by polling when your balance changes
-  //
-  const yourBalance = balance && balance.toNumber && balance.toNumber();
-  const [yourCollectibles, setYourCollectibles] = useState();
+  // const yourBalance = balance && balance.toNumber && balance.toNumber();
+  
 
-  useEffect(() => {
-    const updateYourCollectibles = async () => {
-      let collectibleUpdate = [];
-      for (let tokenIndex = 0; tokenIndex < balance; tokenIndex++) {
-        try {
-          console.log("GEtting token index", tokenIndex);
-          const tokenId = await readContracts.YourCollectible.tokenOfOwnerByIndex(address, tokenIndex);
-          console.log("tokenId", tokenId);
-          const tokenURI = await readContracts.YourCollectible.tokenURI(tokenId);
-          console.log("tokenURI", tokenURI);
+  // useEffect(() => {
+  //   const updateYourCollectibles = async () => {
+  //     let collectibleUpdate = [];
+  //     for (let tokenIndex = 0; tokenIndex < balance; tokenIndex++) {
+  //       try {
+  //         console.log("GEtting token index", tokenIndex);
+  //         const tokenId = await readContracts.YourCollectible.tokenOfOwnerByIndex(address, tokenIndex);
+  //         console.log("tokenId", tokenId);
+  //         const tokenURI = await readContracts.YourCollectible.tokenURI(tokenId);
+  //         console.log("tokenURI", tokenURI);
 
-          const ipfsHash = tokenURI.replace("https://ipfs.io/ipfs/", "");
-          console.log("ipfsHash", ipfsHash);
+  //         const ipfsHash = tokenURI.replace("https://ipfs.io/ipfs/", "");
+  //         console.log("ipfsHash", ipfsHash);
 
-          const jsonManifestBuffer = await getFromIPFS(ipfsHash);
+  //         const jsonManifestBuffer = await getFromIPFS(ipfsHash);
 
-          try {
-            let jsonManifest = JSON.parse(jsonManifestBuffer.toString());
-            jsonManifest.savedDrawing = await LZ.decompress(jsonManifest.savedDrawing);
-            jsonManifest.savedDrawingBack = await LZ.decompress(jsonManifest.savedDrawingBack);
-            jsonManifest.bm = "run🏃🏽‍♂nft";
+  //         try {
+  //           let jsonManifest = JSON.parse(jsonManifestBuffer.toString());
+  //           jsonManifest.savedDrawing = await LZ.decompress(jsonManifest.savedDrawing);
+  //           jsonManifest.savedDrawingBack = await LZ.decompress(jsonManifest.savedDrawingBack);
+  //           jsonManifest.bm = "run🏃🏽‍♂nft";
 
-            // jsonManifest.profile = "";
-            // let _i = new window.Image();
-            // _i.src = jsonManifest.profile;
-            // _i.onload = async () => {
-            //   jsonManifest.profile = _i;
-            // };
+  //           // jsonManifest.profile = "";
+  //           // let _i = new window.Image();
+  //           // _i.src = jsonManifest.profile;
+  //           // _i.onload = async () => {
+  //           //   jsonManifest.profile = _i;
+  //           // };
 
-            // console.log("jsonManifest", jsonManifest);
-            console.log("jsonManifest", JSON.parse(jsonManifest.savedDrawing));
-            collectibleUpdate.push({ id: tokenId, uri: tokenURI, owner: address, ...jsonManifest });
-          } catch (e) {
-            console.log(e);
-          }
-        } catch (e) {
-          console.log(e);
-        }
-      }
-      setYourCollectibles(collectibleUpdate);
-    };
-    updateYourCollectibles();
-  }, [address, yourBalance]);
-
-  /*
-  const addressFromENS = useResolveName(mainnetProvider, "austingriffith.eth");
-  console.log("🏷 Resolved austingriffith.eth as:",addressFromENS)
-  */
-
-  //
-  // 🧫 DEBUG 👨🏻‍🔬
-  //
-  useEffect(() => {
-    // if(DEBUG && mainnetProvider && address && selectedChainId && yourLocalBalance && yourMainnetBalance && readContracts && writeContracts && mainnetDAIContract){
-    if (DEBUG && address && selectedChainId && yourLocalBalance && readContracts && writeContracts) {
-      console.log("_____________________________________ 🏗 scaffold-eth _____________________________________");
-      // console.log("🌎 mainnetProvider",mainnetProvider)
-      console.log("🏠 localChainId", localChainId);
-      console.log("👩‍💼 selected address:", address);
-      console.log("🕵🏻‍♂️ selectedChainId:", selectedChainId);
-      console.log("💵 yourLocalBalance", yourLocalBalance ? formatEther(yourLocalBalance) : "...");
-      // console.log("💵 yourMainnetBalance",yourMainnetBalance?formatEther(yourMainnetBalance):"...")
-      console.log("📝 readContracts", readContracts);
-      // console.log("🌍 DAI contract on mainnet:",mainnetDAIContract)
-      console.log("🔐 writeContracts", writeContracts);
-    }
-    // }, [mainnetProvider, address, selectedChainId, yourLocalBalance, yourMainnetBalance, readContracts, writeContracts, mainnetDAIContract])
-  }, [address, selectedChainId, yourLocalBalance, readContracts, writeContracts]);
+  //           // console.log("jsonManifest", jsonManifest);
+  //           console.log("jsonManifest", JSON.parse(jsonManifest.savedDrawing));
+  //           collectibleUpdate.push({ id: tokenId, uri: tokenURI, owner: address, ...jsonManifest });
+  //         } catch (e) {
+  //           console.log(e);
+  //         }
+  //       } catch (e) {
+  //         console.log(e);
+  //       }
+  //     }
+  //     setYourCollectibles(collectibleUpdate);
+  //   };
+  //   updateYourCollectibles();
+  // }, [address, yourBalance]);
 
   let networkDisplay = "";
-  if (localChainId && selectedChainId && localChainId != selectedChainId) {
-    networkDisplay = (
-      <div style={{ zIndex: 2, position: "absolute", right: 0, top: 60, padding: 16 }}>
-        <Alert
-          message={"⚠️ Wrong Network"}
-          description={
-            <div>
-              You have <b>{NETWORK(selectedChainId).name}</b> selected and you need to be on{" "}
-              <b>{NETWORK(localChainId).name}</b>.
-            </div>
-          }
-          type="error"
-          closable={false}
-        />
-      </div>
-    );
-  } else {
-    networkDisplay = (
-      <div style={{ zIndex: -1, position: "absolute", right: 154, top: 28, padding: 16, color: targetNetwork.color }}>
-        {targetNetwork.name}
-      </div>
-    );
-  }
+  networkDisplay = (
+    <div style={{ zIndex: -1, position: "absolute", right: 154, top: 28, padding: 16, color: targetNetwork.color }}>
+      {targetNetwork.name}
+    </div>
+  );
 
   const loadWeb3Modal = useCallback(async () => {
     const provider = await web3Modal.connect();
-    setInjectedProvider(new Web3Provider(provider));
+    setInjectedProvider(new ethers.providers.Web3Provider(provider));
   }, [setInjectedProvider]);
 
   useEffect(() => {
@@ -307,181 +173,140 @@ function App(props) {
     }
   }, [loadWeb3Modal]);
 
-  const [route, setRoute] = useState();
-  useEffect(() => {
-    setRoute(window.location.pathname);
-  }, [setRoute]);
-
-  // let faucetHint = "";
   const faucetAvailable = true;
-  // const faucetAvailable =
-  // localProvider &&
-  // localProvider.connection &&
-  // localProvider.connection.url &&
-  // localProvider.connection.url.indexOf(window.location.hostname) >= 0 &&
-  // !process.env.REACT_APP_PROVIDER &&
-  // price > 1;
 
-  // const [faucetClicked, setFaucetClicked] = useState(false);
-  // if (
-  //   !faucetClicked &&
-  //   localProvider &&
-  //   localProvider._network &&
-  //   localProvider._network.chainId == 31337 &&
-  //   yourLocalBalance &&
-  //   formatEther(yourLocalBalance) <= 0
-  // ) {
-  //   faucetHint = (
-  //     <div style={{ padding: 16 }}>
-  //       <Button
-  //         type={"primary"}
-  //         onClick={() => {
-  //           faucetTx({
-  //             to: address,
-  //             value: parseEther("0.01"),
-  //           });
-  //           setFaucetClicked(true);
-  //         }}
-  //       >
-  //         💰 Grab funds from the faucet ⛽️
-  //       </Button>
-  //     </div>
-  //   );
-  // }
+  const ethgasAPI = "https://ethgasstation.info/json/ethgasAPI.json";
+  const uniswapV2GQL = "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2";
+  const ethQL = `{
+    bundles (first:1) {
+      ethPrice
+    }
+  }`;
 
-  const [yourJSON, setYourJSON] = useState(STARTING_JSON);
-  const [sending, setSending] = useState();
-  const [ipfsHash, setIpfsHash] = useState();
-  const [ipfsDownHash, setIpfsDownHash] = useState();
+  const getEthPrice = () => {
+    axios
+      .post(uniswapV2GQL, { query: ethQL })
+      .then(response => {
+        const { data } = response;
+        const {
+          data: { bundles },
+        } = data;
+        if (bundles.length > 0) {
+          const ep = parseFloat(bundles[0].ethPrice).toFixed(6);
+          setEthPrice(ep);
+          calcUsd();
+        }
+      })
+      .catch(error => console.log(error));
+  };
 
-  const [downloading, setDownloading] = useState();
-  const [ipfsContent, setIpfsContent] = useState();
+  const gasConverter = g => {
+    const gm = g * 100000000;
+    const gd = parseInt(gm, 10) / 10 ** 9;
+    return gd;
+  };
 
-  const [transferToAddresses, setTransferToAddresses] = useState({});
+  const getGasPrices = () => {
+    axios
+      .get(ethgasAPI)
+      .then(response => {
+        const { data } = response;
+        const { average, fast, fastest } = data;
+        const gasObj = {
+          average: gasConverter(average),
+          fast: gasConverter(fast),
+          fastest: gasConverter(fastest),
+        };
+        setGasPrices(gasObj);
+        setGas(gasObj.fast);
+        calcUsd();
+      })
+      .catch(error => console.log(error));
+  };
+
+  const calcUsd = () => {
+    if (ethPrice < 0 || gas < 0) return;
+    const fg = toGWei(gas);
+    const gm = fromWei(fg * gasLimit);
+    const u = parseFloat(gm * ethPrice).toFixed(6);
+    if (gm > 0) setGasEth(gm);
+    if (u > 0) setGasUsd(u);
+  };
+
+  const init = () => {
+    getEthPrice();
+    getGasPrices();
+  };
+
+  useOnBlock(mainnetProvider, async () => {
+    await setLoading(0);
+    // console.log(mainnetProvider)
+    const bn = await mainnetProvider._lastBlockNumber;
+  
+    setBlockNum(bn);
+
+    init();
+    await setLoading(1);
+  });
+  // usePoller(init, 10000);
 
   return (
     <div className="App">
-      {/* ✏️ Edit the header and change the title to your project name */}
-      <Header />
-      {networkDisplay}
-      <BrowserRouter>
-        {showBroswerRouter && (
-          <Menu style={{ textAlign: "center" }} selectedKeys={[route]} mode="horizontal">
-            <Menu.Item key="/">
-              <Link
-                onClick={() => {
-                  setRoute("/");
-                }}
-                to="/"
-              >
-                YourCollectibles
-              </Link>
-            </Menu.Item>
-            <Menu.Item key="/ipfsup">
-              <Link
-                onClick={() => {
-                  setRoute("/ipfsup");
-                }}
-                to="/ipfsup"
-              >
-                IPFS Upload & Download
-              </Link>
-            </Menu.Item>
+      <Layout>
+        <Header
+          style={{ padding: 5, position: "fixed", zIndex: 1, width: "100%", height: "auto", top: 0 }}
+        >
+          <HeaderSt />
+          <Space></Space>
+        </Header>
+        <Content style={{ paddingTop: 150, paddingBottom: 50, width: "100%" }} className="">
+          <div
+            style={{
+              width: 800,
+              margin: "auto",
+              marginTop: 10,
+              paddingTop: 15,
+              paddingBottom: 15,
+              fontWeight: "bolder",
+              borderRadius: 12,
+            }}
+            class="grad_deeprelief"
+          >
+            <h3> ⚓ latest block num: {blockNum}</h3>
+            <h3> 💲 current eth price: {ethPrice}</h3>
+            <h3> ⛽️ selected gas : {gas} gwei</h3>
+            <h3> gas limit : {gasLimit}</h3>
+            <h3> ♦ gas cost (eth) : {gasEth}</h3>
+            <h3> 💲 gas cost (usd) : {gasUsd}</h3>
+            <Divider />
+            
+          </div>
 
-            <Menu.Item key="/debugcontracts">
-              <Link
-                onClick={() => {
-                  setRoute("/debugcontracts");
-                }}
-                to="/debugcontracts"
-              >
-                Debug Contracts
-              </Link>
-            </Menu.Item>
-          </Menu>
-        )}
+          <div
+            style={{
+              width: 800,
+              margin: "auto",
+              marginTop: 10,
+              padding: 10,
+              fontWeight: "bolder",
+              borderRadius: 12,
+            }}
+            class="grad_deeprelief"
+          >
+            <div> ****** </div>
+            <div style={{ textAlign: "left" }}>
+              
+            </div>
+          </div>
+          <StravaActivityMap
+            address={address}
+            tx={tx}
+            provider={userProvider}
+            writeContracts={writeContracts}
+            readContracts={readContracts}
+          />
 
-        <Switch>
-          <Route exact path="/">
-            {/*
-                🎛 this scaffolding is full of commonly used components
-                this <Contract/> component will automatically parse your ABI
-                and give you a form to interact with it locally
-            */}
-            {/*
-              <StravaActivityChallenge 
-                address={address} 
-                tx={tx} 
-                provider={userProvider} 
-                writeContracts={writeContracts} 
-                readContracts={readContracts} 
-              />
-            */}
-            {
-              <StravaActivityMap
-                address={address}
-                tx={tx}
-                provider={userProvider}
-                writeContracts={writeContracts}
-                readContracts={readContracts}
-              />
-            }
-            <div style={{ width: 640, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
-              {/*
-              <List
-                bordered
-                dataSource={yourCollectibles}
-                renderItem={item => {
-                  const id = item.id.toNumber();
-                  return (
-                    <List.Item key={id + "_" + item.uri + "_" + item.owner}>
-                      <Card
-                        title={
-                          <div>
-                            <span style={{ fontSize: 16, marginRight: 8 }}>#{id}</span> {item.name}
-                          </div>
-                        }
-                      >
-                        <div>
-                          <img src={item.image} style={{ maxWidth: 150 }} />
-                        </div>
-                        <div>{item.description}</div>
-                      </Card>
-
-                      <div>
-                        owner:{" "}
-                        <Address
-                          address={item.owner}
-                          // ensProvider={mainnetProvider}
-                          blockExplorer={blockExplorer}
-                          fontSize={16}
-                        />
-                        <AddressInput
-                          // ensProvider={mainnetProvider}
-                          placeholder="transfer to address"
-                          value={transferToAddresses[id]}
-                          onChange={newValue => {
-                            let update = {};
-                            update[id] = newValue;
-                            setTransferToAddresses({ ...transferToAddresses, ...update });
-                          }}
-                        />
-                        <Button
-                          onClick={() => {
-                            console.log("writeContracts", writeContracts);
-                            tx(writeContracts.YourCollectible.transferFrom(address, transferToAddresses[id], id));
-                          }}
-                        >
-                          Transfer
-                        </Button>
-                      </div>
-                    </List.Item>
-                  );
-                }}
-              />
-            */}
-
-              <List
+          <List
                 header={<div>Mints</div>}
                 bordered
                 dataSource={yourCollectibles}
@@ -500,19 +325,16 @@ function App(props) {
                           id={"canvas_play_" + id}
                           style={{ width: 500, height: "100%", margin: "auto", marginTop: 10, paddingBottom: 10 }}
                         >
-                          {/*item.image && 
-                            (<img src={item.image} style={{width:500, height:500}} />)
-                          */}
                         </div>
                         <div style={{ width: 500, height: "100%", margin: "auto", marginTop: 10, paddingBottom: 10 }}>
                           owner:{" "}
                           <Address
                             address={item.owner}
                             // ensProvider={mainnetProvider}
-                            blockExplorer={blockExplorer}
+                            // blockExplorer={blockExplorer}
                             fontSize={16}
                           />
-                          <AddressInput
+                          {/*<AddressInput
                             // ensProvider={mainnetProvider}
                             placeholder="transfer to address"
                             value={transferToAddresses[id]}
@@ -521,7 +343,7 @@ function App(props) {
                               update[id] = newValue;
                               setTransferToAddresses({ ...transferToAddresses, ...update });
                             }}
-                          />
+                          />*/}
                         </div>
                         <div style={{ width: 500, height: "100%", margin: "auto", marginTop: 10, paddingBottom: 10 }}>
                           <Space>
@@ -542,7 +364,7 @@ function App(props) {
                 }}
               />
 
-              <List
+          <List
                 header={<div>Transfer Events</div>}
                 bordered
                 dataSource={transferEvents}
@@ -565,179 +387,37 @@ function App(props) {
                   );
                 }}
               />
-            </div>
-          </Route>
+        </Content>
+        <Footer
+          style={{ padding: 5, position: "fixed", zIndex: 1, width: "100%", bottom: 0 }}
+          className="grad_glasswater"
+        >
+          <Row align="middle" gutter={[4, 4]}>
+            <Col span={12}>
+            </Col>
 
-          <Route path="/ipfsup">
-            {showBroswerRouter && (
-              <div style={{ paddingTop: 32, width: 740, margin: "auto", textAlign: "left" }}>
-                <ReactJson
-                  style={{ padding: 8 }}
-                  src={yourJSON}
-                  theme={"pop"}
-                  enableClipboard={false}
-                  onEdit={(edit, a) => {
-                    setYourJSON(edit.updated_src);
-                  }}
-                  onAdd={(add, a) => {
-                    setYourJSON(add.updated_src);
-                  }}
-                  onDelete={(del, a) => {
-                    setYourJSON(del.updated_src);
-                  }}
-                />
+            <Col span={12} style={{ textAlign: "center" }}>
+              <div style={{ opacity: 0.5 }}>
+                {/*<a
+                  target="_blank"
+                  style={{ color: "#000" }}
+                  href="https://github.com/austintgriffith/scaffold-eth"
+                >
+                  🍴 Repo: Fork me!
+                </a>
+                <br />*/}
+                <a
+                  target="_blank"
+                  style={{ color: "#000" }}
+                  href="https://github.com/harryranakl/scaffold-eth-strava-runners-nft"
+                >
+                  🍴 Repo: Fork me!
+                </a>
               </div>
-            )}
-            {showBroswerRouter && (
-              <Button
-                style={{ margin: 8 }}
-                loading={sending}
-                size="large"
-                shape="round"
-                type="primary"
-                onClick={async () => {
-                  console.log("UPLOADING...", yourJSON);
-                  setSending(true);
-                  setIpfsHash();
-                  const result = await ipfs.add(JSON.stringify(yourJSON)); //addToIPFS(JSON.stringify(yourJSON))
-                  if (result && result.path) {
-                    setIpfsHash(result.path);
-                  }
-                  setSending(false);
-                  console.log("RESULT:", result);
-                }}
-              >
-                Upload to IPFS
-              </Button>
-            )}
-            {showBroswerRouter && <div style={{ padding: 16, paddingBottom: 150 }}>{ipfsHash}</div>}
-
-            {showBroswerRouter && (
-              <div style={{ paddingTop: 10, width: 740, margin: "auto" }}>
-                <Input
-                  value={ipfsDownHash}
-                  placeHolder={"IPFS hash (like QmadqNw8zkdrrwdtPFK1pLi8PPxmkQ4pDJXY8ozHtz6tZq)"}
-                  onChange={e => {
-                    setIpfsDownHash(e.target.value);
-                  }}
-                />
-              </div>
-            )}
-            {showBroswerRouter && (
-              <Button
-                style={{ margin: 8 }}
-                loading={sending}
-                size="large"
-                shape="round"
-                type="primary"
-                onClick={async () => {
-                  console.log("DOWNLOADING...", ipfsDownHash);
-                  setDownloading(true);
-                  setIpfsContent();
-                  const result = await getFromIPFS(ipfsDownHash); //addToIPFS(JSON.stringify(yourJSON))
-                  if (result && result.toString) {
-                    setIpfsContent(result.toString());
-                  }
-                  debugger;
-                  setDownloading(false);
-                }}
-              >
-                Download from IPFS
-              </Button>
-            )}
-            {showBroswerRouter && (
-              <pre style={{ padding: 16, width: 500, margin: "auto", paddingBottom: 150 }}>{ipfsContent}</pre>
-            )}
-          </Route>
-          <Route path="/debugcontracts">
-            {showBroswerRouter && (
-              <Contract
-                name="YourChallenge"
-                signer={userProvider && userProvider.getSigner()}
-                provider={userProvider}
-                address={address}
-                blockExplorer={blockExplorer}
-              />
-            )}
-            {/*showBroswerRouter && (
-              
-              <Contract
-                name="YourCollectible"
-                signer={userProvider && userProvider.getSigner()}
-                provider={userProvider}
-                address={address}
-                blockExplorer={blockExplorer}
-              />
-            )*/}
-          </Route>
-        </Switch>
-      </BrowserRouter>
-
-      <ThemeSwitch />
-
-      {/* 👨‍💼 Your account is in the top right with a wallet at connect options */}
-      <div style={{ position: "fixed", textAlign: "right", right: 0, top: 0, padding: 10 }}>
-        <Account
-          address={address}
-          localProvider={userProvider}
-          userProvider={userProvider}
-          // mainnetProvider={mainnetProvider}
-          // price={price}
-          web3Modal={web3Modal}
-          loadWeb3Modal={loadWeb3Modal}
-          logoutOfWeb3Modal={logoutOfWeb3Modal}
-          blockExplorer={blockExplorer}
-        />
-        {/*faucetHint*/}
-      </div>
-
-      {/* 🗺 Extra UI like gas price, eth price, faucet, and support: */}
-      <div style={{ position: "fixed", textAlign: "left", left: 0, bottom: 20, padding: 10 }}>
-        <Row align="middle" gutter={[4, 4]}>
-          {/*
-          <Col span={12}>
-            <Ramp price={price} address={address} networks={NETWORKS} />
-          </Col>
-        */}
-
-          <Col span={12} style={{ textAlign: "center", opacity: 0.8 }}>
-            <GasGauge gasPrice={gasPrice} />
-          </Col>
-          {/*
-          <Col span={8} style={{ textAlign: "center", opacity: 1 }}>
-            <Button
-              onClick={() => {
-                window.open("https://t.me/joinchat/KByvmRe5wkR-8F_zz6AjpA");
-              }}
-              size="large"
-              shape="round"
-            >
-              <span style={{ marginRight: 8 }} role="img" aria-label="support">
-                💬
-              </span>
-              Support
-            </Button>
-          </Col>
-        */}
-        </Row>
-
-        <Row align="middle" gutter={[4, 4]}>
-          <Col span={24}>
-            {
-              /*  if the local provider has a signer, let's show the faucet:  */
-              faucetAvailable ? (
-                <Faucet
-                  localProvider={userProvider}
-                  // price={price}
-                  // ensProvider={mainnetProvider}
-                />
-              ) : (
-                ""
-              )
-            }
-          </Col>
-        </Row>
-      </div>
+            </Col>
+          </Row>
+        </Footer>
+      </Layout>
     </div>
   );
 }

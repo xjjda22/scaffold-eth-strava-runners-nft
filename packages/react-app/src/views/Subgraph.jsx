@@ -1,18 +1,17 @@
 /* eslint-disable jsx-a11y/accessible-emoji */
-
-import React, { useState } from "react";
+import { gql, useQuery } from "@apollo/client";
+import { Button, Input, Table, Typography } from "antd";
 import "antd/dist/antd.css";
-import { Button, Typography, Table, Input } from "antd";
-import { useQuery, gql } from "@apollo/client";
-import { Address } from "../components";
 import GraphiQL from "graphiql";
 import "graphiql/graphiql.min.css";
 import fetch from "isomorphic-fetch";
+import React, { useState } from "react";
+import { Address } from "../components";
 
 const highlight = {
   marginLeft: 4,
   marginRight: 8,
-  /*backgroundColor: "#f9f9f9",*/ padding: 4,
+  /* backgroundColor: "#f9f9f9", */ padding: 4,
   borderRadius: 4,
   fontWeight: "bolder",
 };
@@ -68,14 +67,14 @@ function Subgraph(props) {
   const [newPurpose, setNewPurpose] = useState("loading...");
 
   const deployWarning = (
-    <div style={{ marginTop: 8, padding: 8 }}>{"Warning: 🤔 Have you deployed your subgraph yet?"}</div>
+    <div style={{ marginTop: 8, padding: 8 }}>Warning: 🤔 Have you deployed your subgraph yet?</div>
   );
 
   return (
     <>
       <div style={{ margin: "auto", marginTop: 32 }}>
         You will find that parsing/tracking events with the{" "}
-        <span class="highlight" style={highlight}>
+        <span className="highlight" style={highlight}>
           useEventListener
         </span>{" "}
         hook becomes a chore for every new project.
@@ -86,7 +85,7 @@ function Subgraph(props) {
           The Graph
         </a>{" "}
         with 🏗 scaffold-eth (
-        <a href="https://youtu.be/T5ylzOTkn-Q" target="_blank">
+        <a href="https://youtu.be/T5ylzOTkn-Q" target="_blank" rel="noopener noreferrer">
           learn more
         </a>
         ):
@@ -95,16 +94,16 @@ function Subgraph(props) {
       <div style={{ margin: 32 }}>
         <span style={{ marginRight: 8 }}>🚮</span>
         Clean up previous data:
-        <span class="highlight" style={highlight}>
-          rm -rf docker/graph-node/data/
+        <span className="highlight" style={highlight}>
+          yarn clean-graph-node
         </span>
       </div>
 
       <div style={{ margin: 32 }}>
         <span style={{ marginRight: 8 }}>📡</span>
         Spin up a local graph node by running
-        <span class="highlight" style={highlight}>
-          yarn graph-run-node
+        <span className="highlight" style={highlight}>
+          yarn run-graph-node
         </span>
         <span style={{ marginLeft: 4 }}>
           {" "}
@@ -120,7 +119,7 @@ function Subgraph(props) {
       <div style={{ margin: 32 }}>
         <span style={{ marginRight: 8 }}>📝</span>
         Create your <b>local subgraph</b> by running
-        <span class="highlight" style={highlight}>
+        <span className="highlight" style={highlight}>
           yarn graph-create-local
         </span>
         (only required once!)
@@ -129,7 +128,7 @@ function Subgraph(props) {
       <div style={{ margin: 32 }}>
         <span style={{ marginRight: 8 }}>🚢</span>
         Deploy your <b>local subgraph</b> by running
-        <span class="highlight" style={highlight}>
+        <span className="highlight" style={highlight}>
           yarn graph-ship-local
         </span>
       </div>
@@ -137,7 +136,7 @@ function Subgraph(props) {
       <div style={{ margin: 32 }}>
         <span style={{ marginRight: 8 }}>🖍️</span>
         Edit your <b>local subgraph</b> in
-        <span class="highlight" style={highlight}>
+        <span className="highlight" style={highlight}>
           packages/subgraph/src
         </span>
         (learn more about subgraph definition{" "}
@@ -150,7 +149,7 @@ function Subgraph(props) {
       <div style={{ margin: 32 }}>
         <span style={{ marginRight: 8 }}>🤩</span>
         Deploy your <b>contracts and your subgraph</b> in one go by running
-        <span class="highlight" style={highlight}>
+        <span className="highlight" style={highlight}>
           yarn deploy-and-graph
         </span>
       </div>
@@ -174,13 +173,13 @@ function Subgraph(props) {
         </div>
 
         {data ? (
-          <Table dataSource={data.purposes} columns={purposeColumns} rowKey={"id"} />
+          <Table dataSource={data.purposes} columns={purposeColumns} rowKey="id" />
         ) : (
           <Typography>{loading ? "Loading..." : deployWarning}</Typography>
         )}
 
         <div style={{ margin: 32, height: 400, border: "1px solid #888888", textAlign: "left" }}>
-          <GraphiQL fetcher={graphQLFetcher} docExplorerOpen={true} query={EXAMPLE_GRAPHQL} />
+          <GraphiQL fetcher={graphQLFetcher} docExplorerOpen query={EXAMPLE_GRAPHQL} />
         </div>
       </div>
 

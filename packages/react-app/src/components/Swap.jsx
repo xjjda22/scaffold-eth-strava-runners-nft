@@ -1,25 +1,24 @@
-import React, { useState, useEffect } from "react";
-import {
-  Space,
-  Row,
-  InputNumber,
-  Card,
-  notification,
-  Select,
-  Descriptions,
-  Typography,
-  Button,
-  Divider,
-  Tooltip,
-  Drawer,
-  Modal,
-} from "antd";
-import { SettingOutlined, RetweetOutlined } from "@ant-design/icons";
-import { ChainId, Token, WETH, Fetcher, Trade, TokenAmount, Percent } from "@uniswap/sdk";
-import { parseUnits, formatUnits } from "@ethersproject/units";
-import { ethers } from "ethers";
-import { useBlockNumber, usePoller } from "eth-hooks";
+import { RetweetOutlined, SettingOutlined } from "@ant-design/icons";
+import { ChainId, Fetcher, Percent, Token, TokenAmount, Trade, WETH } from "@uniswap/sdk";
 import { abi as IUniswapV2Router02ABI } from "@uniswap/v2-periphery/build/IUniswapV2Router02.json";
+import {
+  Button,
+  Card,
+  Descriptions,
+  Divider,
+  Drawer,
+  InputNumber,
+  Modal,
+  notification,
+  Row,
+  Select,
+  Space,
+  Tooltip,
+  Typography,
+} from "antd";
+import { useBlockNumber, usePoller } from "eth-hooks";
+import { ethers } from "ethers";
+import React, { useEffect, useState } from "react";
 import { useDebounce } from "../hooks";
 
 const { Option } = Select;
@@ -44,15 +43,14 @@ const makeCall = async (callName, contract, args, metadata = {}) => {
       result = await contract[callName]();
     }
     return result;
-  } else {
-    console.log("no call of that name!");
   }
+  console.log("no call of that name!");
 };
 
-let defaultToken = "ETH";
-let defaultTokenOut = "DAI";
-let defaultSlippage = "0.5";
-let defaultTimeLimit = 60 * 10;
+const defaultToken = "ETH";
+const defaultTokenOut = "DAI";
+const defaultSlippage = "0.5";
+const defaultTimeLimit = 60 * 10;
 
 const tokenListToObject = array =>
   array.reduce((obj, item) => {
@@ -87,12 +85,12 @@ function Swap({ selectedProvider, tokenListURI }) {
 
   const [invertPrice, setInvertPrice] = useState(false);
 
-  let blockNumber = useBlockNumber(selectedProvider, 3000);
+  const blockNumber = useBlockNumber(selectedProvider, 3000);
 
-  let signer = selectedProvider.getSigner();
-  let routerContract = new ethers.Contract(ROUTER_ADDRESS, IUniswapV2Router02ABI, signer);
+  const signer = selectedProvider.getSigner();
+  const routerContract = new ethers.Contract(ROUTER_ADDRESS, IUniswapV2Router02ABI, signer);
 
-  let _tokenListUri = tokenListURI ? tokenListURI : "https://gateway.ipfs.io/ipns/tokens.uniswap.org";
+  const _tokenListUri = tokenListURI || "https://gateway.ipfs.io/ipns/tokens.uniswap.org";
 
   const debouncedAmountIn = useDebounce(amountIn, 500);
   const debouncedAmountOut = useDebounce(amountOut, 500);
@@ -103,19 +101,19 @@ function Swap({ selectedProvider, tokenListURI }) {
     const getTokenList = async () => {
       console.log(_tokenListUri);
       try {
-        let tokenList = await fetch(_tokenListUri);
-        let tokenListJson = await tokenList.json();
-        let filteredTokens = tokenListJson.tokens.filter(function (t) {
+        const tokenList = await fetch(_tokenListUri);
+        const tokenListJson = await tokenList.json();
+        const filteredTokens = tokenListJson.tokens.filter(function (t) {
           return t.chainId === activeChainId;
         });
-        let ethToken = WETH[activeChainId];
+        const ethToken = WETH[activeChainId];
         ethToken.name = "Ethereum";
         ethToken.symbol = "ETH";
         ethToken.logoURI =
           "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png";
-        let _tokenList = [ethToken, ...filteredTokens];
+        const _tokenList = [ethToken, ...filteredTokens];
         setTokenList(_tokenList);
-        let _tokens = tokenListToObject(_tokenList);
+        const _tokens = tokenListToObject(_tokenList);
         setTokens(_tokens);
       } catch (e) {
         console.log(e);
@@ -126,9 +124,9 @@ function Swap({ selectedProvider, tokenListURI }) {
 
   const getTrades = async () => {
     if (tokenIn && tokenOut && (amountIn || amountOut)) {
-      let pairs = arr => arr.map((v, i) => arr.slice(i + 1).map(w => [v, w])).flat();
+      const pairs = arr => arr.map((v, i) => arr.slice(i + 1).map(w => [v, w])).flat();
 
-      let baseTokens = tokenList
+      const baseTokens = tokenList
         .filter(function (t) {
           return ["DAI", "USDC", "USDT", "COMP", "ETH", "MKR", "LINK", tokenIn, tokenOut].includes(t.symbol);
         })
@@ -136,14 +134,14 @@ function Swap({ selectedProvider, tokenListURI }) {
           return new Token(el.chainId, el.address, el.decimals, el.symbol, el.name);
         });
 
-      let listOfPairwiseTokens = pairs(baseTokens);
+      const listOfPairwiseTokens = pairs(baseTokens);
 
       const getPairs = async list => {
-        let listOfPromises = list.map(item => Fetcher.fetchPairData(item[0], item[1], selectedProvider));
+        const listOfPromises = list.map(item => Fetcher.fetchPairData(item[0], item[1], selectedProvider));
         return Promise.all(listOfPromises.map(p => p.catch(() => undefined)));
       };
 
-      let listOfPairs = await getPairs(listOfPairwiseTokens);
+      const listOfPairs = await getPairs(listOfPairwiseTokens);
 
       let bestTrade;
 
@@ -151,7 +149,7 @@ function Swap({ selectedProvider, tokenListURI }) {
         setAmountInMax();
         bestTrade = Trade.bestTradeExactIn(
           listOfPairs.filter(item => item),
-          new TokenAmount(tokens[tokenIn], parseUnits(amountIn.toString(), tokens[tokenIn].decimals)),
+          new TokenAmount(tokens[tokenIn], ethers.utils.parseUnits(amountIn.toString(), tokens[tokenIn].decimals)),
           tokens[tokenOut],
           { maxNumResults: 3, maxHops: 1 },
         );
@@ -165,7 +163,7 @@ function Swap({ selectedProvider, tokenListURI }) {
         bestTrade = Trade.bestTradeExactOut(
           listOfPairs.filter(item => item),
           tokens[tokenIn],
-          new TokenAmount(tokens[tokenOut], parseUnits(amountOut.toString(), tokens[tokenOut].decimals)),
+          new TokenAmount(tokens[tokenOut], ethers.utils.parseUnits(amountOut.toString(), tokens[tokenOut].decimals)),
           { maxNumResults: 3, maxHops: 1 },
         );
         if (bestTrade[0]) {
@@ -207,11 +205,11 @@ function Swap({ selectedProvider, tokenListURI }) {
 
   const getAccountInfo = async () => {
     if (tokens) {
-      let accountList = await selectedProvider.listAccounts();
+      const accountList = await selectedProvider.listAccounts();
 
       if (tokenIn) {
-        let tempContractIn = new ethers.Contract(tokens[tokenIn].address, erc20Abi, selectedProvider);
-        let newBalanceIn = await getBalance(tokenIn, accountList[0], tempContractIn);
+        const tempContractIn = new ethers.Contract(tokens[tokenIn].address, erc20Abi, selectedProvider);
+        const newBalanceIn = await getBalance(tokenIn, accountList[0], tempContractIn);
         setBalanceIn(newBalanceIn);
 
         let allowance;
@@ -225,8 +223,8 @@ function Swap({ selectedProvider, tokenListURI }) {
       }
 
       if (tokenOut) {
-        let tempContractOut = new ethers.Contract(tokens[tokenOut].address, erc20Abi, selectedProvider);
-        let newBalanceOut = await getBalance(tokenOut, accountList[0], tempContractOut);
+        const tempContractOut = new ethers.Contract(tokens[tokenOut].address, erc20Abi, selectedProvider);
+        const newBalanceOut = await getBalance(tokenOut, accountList[0], tempContractOut);
         setBalanceOut(newBalanceOut);
       }
     }
@@ -234,10 +232,10 @@ function Swap({ selectedProvider, tokenListURI }) {
 
   usePoller(getAccountInfo, 6000);
 
-  let route = trades
+  const route = trades
     ? trades.length > 0
       ? trades[0].route.path.map(function (item) {
-          return item["symbol"];
+          return item.symbol;
         })
       : []
     : [];
@@ -245,8 +243,8 @@ function Swap({ selectedProvider, tokenListURI }) {
   const updateRouterAllowance = async newAllowance => {
     setApproving(true);
     try {
-      let tempContract = new ethers.Contract(tokens[tokenIn].address, erc20Abi, signer);
-      let result = await makeCall("approve", tempContract, [ROUTER_ADDRESS, newAllowance]);
+      const tempContract = new ethers.Contract(tokens[tokenIn].address, erc20Abi, signer);
+      const result = await makeCall("approve", tempContract, [ROUTER_ADDRESS, newAllowance]);
       console.log(result);
       setApproving(false);
       return true;
@@ -259,12 +257,12 @@ function Swap({ selectedProvider, tokenListURI }) {
   };
 
   const approveRouter = async () => {
-    let approvalAmount =
+    const approvalAmount =
       exact === "in"
-        ? ethers.utils.hexlify(parseUnits(amountIn.toString(), tokens[tokenIn].decimals))
+        ? ethers.utils.hexlify(ethers.utils.parseUnits(amountIn.toString(), tokens[tokenIn].decimals))
         : amountInMax.raw.toString();
     console.log(approvalAmount);
-    let approval = updateRouterAllowance(approvalAmount);
+    const approval = updateRouterAllowance(approvalAmount);
     if (approval) {
       notification.open({
         message: "Token transfer approved",
@@ -274,9 +272,9 @@ function Swap({ selectedProvider, tokenListURI }) {
   };
 
   const removeRouterAllowance = async () => {
-    let approvalAmount = ethers.utils.hexlify(0);
+    const approvalAmount = ethers.utils.hexlify(0);
     console.log(approvalAmount);
-    let removal = updateRouterAllowance(approvalAmount);
+    const removal = updateRouterAllowance(approvalAmount);
     if (removal) {
       notification.open({
         message: "Token approval removed",
@@ -289,42 +287,44 @@ function Swap({ selectedProvider, tokenListURI }) {
     setSwapping(true);
     try {
       let args;
-      let metadata = {};
+      const metadata = {};
 
       let call;
-      let deadline = Math.floor(Date.now() / 1000) + timeLimit;
-      let path = trades[0].route.path.map(function (item) {
-        return item["address"];
+      const deadline = Math.floor(Date.now() / 1000) + timeLimit;
+      const path = trades[0].route.path.map(function (item) {
+        return item.address;
       });
       console.log(path);
-      let accountList = await selectedProvider.listAccounts();
-      let address = accountList[0];
+      const accountList = await selectedProvider.listAccounts();
+      const address = accountList[0];
 
       if (exact === "in") {
-        let _amountIn = ethers.utils.hexlify(parseUnits(amountIn.toString(), tokens[tokenIn].decimals));
-        let _amountOutMin = ethers.utils.hexlify(ethers.BigNumber.from(amountOutMin.raw.toString()));
+        const _amountIn = ethers.utils.hexlify(ethers.utils.parseUnits(amountIn.toString(), tokens[tokenIn].decimals));
+        const _amountOutMin = ethers.utils.hexlify(ethers.BigNumber.from(amountOutMin.raw.toString()));
         if (tokenIn === "ETH") {
           call = "swapExactETHForTokens";
           args = [_amountOutMin, path, address, deadline];
-          metadata["value"] = _amountIn;
+          metadata.value = _amountIn;
         } else {
           call = tokenOut === "ETH" ? "swapExactTokensForETH" : "swapExactTokensForTokens";
           args = [_amountIn, _amountOutMin, path, address, deadline];
         }
       } else if (exact === "out") {
-        let _amountOut = ethers.utils.hexlify(parseUnits(amountOut.toString(), tokens[tokenOut].decimals));
-        let _amountInMax = ethers.utils.hexlify(ethers.BigNumber.from(amountInMax.raw.toString()));
+        const _amountOut = ethers.utils.hexlify(
+          ethers.utils.parseUnits(amountOut.toString(), tokens[tokenOut].decimals),
+        );
+        const _amountInMax = ethers.utils.hexlify(ethers.BigNumber.from(amountInMax.raw.toString()));
         if (tokenIn === "ETH") {
           call = "swapETHForExactTokens";
           args = [_amountOut, path, address, deadline];
-          metadata["value"] = _amountInMax;
+          metadata.value = _amountInMax;
         } else {
           call = tokenOut === "ETH" ? "swapTokensForExactETH" : "swapTokensForExactTokens";
           args = [_amountOut, _amountInMax, path, address, deadline];
         }
       }
       console.log(call, args, metadata);
-      let result = await makeCall(call, routerContract, args, metadata);
+      const result = await makeCall(call, routerContract, args, metadata);
       console.log(result);
       notification.open({
         message: "Swap complete 🦄",
@@ -359,27 +359,29 @@ function Swap({ selectedProvider, tokenListURI }) {
     setSwapModalVisible(false);
   };
 
-  let insufficientBalance = balanceIn ? parseFloat(formatUnits(balanceIn, tokens[tokenIn].decimals)) < amountIn : null;
-  let inputIsToken = tokenIn !== "ETH";
-  let insufficientAllowance = !inputIsToken
+  const insufficientBalance = balanceIn
+    ? parseFloat(ethers.utils.formatUnits(balanceIn, tokens[tokenIn].decimals)) < amountIn
+    : null;
+  const inputIsToken = tokenIn !== "ETH";
+  const insufficientAllowance = !inputIsToken
     ? false
     : routerAllowance
-    ? parseFloat(formatUnits(routerAllowance, tokens[tokenIn].decimals)) < amountIn
+    ? parseFloat(ethers.utils.formatUnits(routerAllowance, tokens[tokenIn].decimals)) < amountIn
     : null;
-  let formattedBalanceIn = balanceIn
-    ? parseFloat(formatUnits(balanceIn, tokens[tokenIn].decimals)).toPrecision(6)
+  const formattedBalanceIn = balanceIn
+    ? parseFloat(ethers.utils.formatUnits(balanceIn, tokens[tokenIn].decimals)).toPrecision(6)
     : null;
-  let formattedBalanceOut = balanceOut
-    ? parseFloat(formatUnits(balanceOut, tokens[tokenOut].decimals)).toPrecision(6)
+  const formattedBalanceOut = balanceOut
+    ? parseFloat(ethers.utils.formatUnits(balanceOut, tokens[tokenOut].decimals)).toPrecision(6)
     : null;
 
-  let metaIn =
+  const metaIn =
     tokens && tokenList && tokenIn
       ? tokenList.filter(function (t) {
           return t.address === tokens[tokenIn].address;
         })[0]
       : null;
-  let metaOut =
+  const metaOut =
     tokens && tokenList && tokenOut
       ? tokenList.filter(function (t) {
           return t.address === tokens[tokenOut].address;
@@ -395,18 +397,18 @@ function Swap({ selectedProvider, tokenListURI }) {
     }
   };
 
-  let logoIn = metaIn ? cleanIpfsURI(metaIn.logoURI) : null;
-  let logoOut = metaOut ? cleanIpfsURI(metaOut.logoURI) : null;
+  const logoIn = metaIn ? cleanIpfsURI(metaIn.logoURI) : null;
+  const logoOut = metaOut ? cleanIpfsURI(metaOut.logoURI) : null;
 
-  let rawPrice = trades && trades[0] ? trades[0].executionPrice : null;
-  let price = rawPrice ? rawPrice.toSignificant(7) : null;
-  let priceDescription = rawPrice
+  const rawPrice = trades && trades[0] ? trades[0].executionPrice : null;
+  const price = rawPrice ? rawPrice.toSignificant(7) : null;
+  const priceDescription = rawPrice
     ? invertPrice
       ? `${rawPrice.invert().toSignificant(7)} ${tokenIn} per ${tokenOut}`
       : `${price} ${tokenOut} per ${tokenIn}`
     : null;
 
-  let priceWidget = (
+  const priceWidget = (
     <Space>
       <Text type="secondary">{priceDescription}</Text>
       <Button
@@ -420,7 +422,7 @@ function Swap({ selectedProvider, tokenListURI }) {
     </Space>
   );
 
-  let swapModal = (
+  const swapModal = (
     <Modal title="Confirm swap" visible={swapModalVisible} onOk={handleSwapModalOk} onCancel={handleSwapModalCancel}>
       <Row>
         <Space>
@@ -487,7 +489,7 @@ function Swap({ selectedProvider, tokenListURI }) {
                   type="link"
                   onClick={() => {
                     setAmountOut();
-                    setAmountIn(formatUnits(balanceIn, tokens[tokenIn].decimals));
+                    setAmountIn(ethers.utils.formatUnits(balanceIn, tokens[tokenIn].decimals));
                     setAmountOutMin();
                     setAmountInMax();
                     setExact("in");
@@ -502,7 +504,7 @@ function Swap({ selectedProvider, tokenListURI }) {
             <InputNumber
               style={{ width: "160px" }}
               min={0}
-              size={"large"}
+              size="large"
               value={amountIn}
               onChange={e => {
                 setAmountOut();
@@ -515,7 +517,7 @@ function Swap({ selectedProvider, tokenListURI }) {
               showSearch
               value={tokenIn}
               style={{ width: "120px" }}
-              size={"large"}
+              size="large"
               bordered={false}
               defaultValue={defaultToken}
               onChange={value => {
@@ -563,7 +565,7 @@ function Swap({ selectedProvider, tokenListURI }) {
           >
             <InputNumber
               style={{ width: "160px" }}
-              size={"large"}
+              size="large"
               min={0}
               value={amountOut}
               onChange={e => {
@@ -577,7 +579,7 @@ function Swap({ selectedProvider, tokenListURI }) {
               showSearch
               value={tokenOut}
               style={{ width: "120px" }}
-              size={"large"}
+              size="large"
               bordered={false}
               onChange={value => {
                 console.log(value, tokenIn, tokenOut);
@@ -637,7 +639,7 @@ function Swap({ selectedProvider, tokenListURI }) {
           <Descriptions.Item label="blockNumber">{blockNumber}</Descriptions.Item>
           <Descriptions.Item label="routerAllowance">
             <Space>
-              {routerAllowance ? formatUnits(routerAllowance, tokens[tokenIn].decimals) : null}
+              {routerAllowance ? ethers.utils.formatUnits(routerAllowance, tokens[tokenIn].decimals) : null}
               {routerAllowance > 0 ? <Button onClick={removeRouterAllowance}>Remove Allowance</Button> : null}
             </Space>
           </Descriptions.Item>
@@ -653,37 +655,33 @@ function Swap({ selectedProvider, tokenListURI }) {
             {trades ? (trades.length > 0 ? trades[0].priceImpact.toSignificant(6) : null) : null}
           </Descriptions.Item>
           <Descriptions.Item label="slippageTolerance">
-            {
-              <InputNumber
-                defaultValue={defaultSlippage}
-                min={0}
-                max={100}
-                precision={2}
-                formatter={value => `${value}%`}
-                parser={value => value.replace("%", "")}
-                onChange={value => {
-                  console.log(value);
+            <InputNumber
+              defaultValue={defaultSlippage}
+              min={0}
+              max={100}
+              precision={2}
+              formatter={value => `${value}%`}
+              parser={value => value.replace("%", "")}
+              onChange={value => {
+                console.log(value);
 
-                  let slippagePercent = new Percent(Math.round(value * 100).toString(), "10000");
-                  setSlippageTolerance(slippagePercent);
-                }}
-              />
-            }
+                const slippagePercent = new Percent(Math.round(value * 100).toString(), "10000");
+                setSlippageTolerance(slippagePercent);
+              }}
+            />
           </Descriptions.Item>
           <Descriptions.Item label="amountInMax">{amountInMax ? amountInMax.toExact() : null}</Descriptions.Item>
           <Descriptions.Item label="amountOutMin">{amountOutMin ? amountOutMin.toExact() : null}</Descriptions.Item>
           <Descriptions.Item label="timeLimitInSeconds">
-            {
-              <InputNumber
-                min={0}
-                max={3600}
-                defaultValue={defaultTimeLimit}
-                onChange={value => {
-                  console.log(value);
-                  setTimeLimit(value);
-                }}
-              />
-            }
+            <InputNumber
+              min={0}
+              max={3600}
+              defaultValue={defaultTimeLimit}
+              onChange={value => {
+                console.log(value);
+                setTimeLimit(value);
+              }}
+            />
           </Descriptions.Item>
         </Descriptions>
       </Drawer>

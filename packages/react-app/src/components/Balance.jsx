@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { formatEther } from "@ethersproject/units";
-import { usePoller } from "eth-hooks";
 import { useBalance } from "../hooks";
+
+const { utils } = require("ethers");
 
 /*
   ~ What it does? ~
@@ -32,7 +32,7 @@ import { useBalance } from "../hooks";
 export default function Balance(props) {
   const [dollarMode, setDollarMode] = useState(true);
 
-  const [listening, setListening] = useState(false);
+  // const [listening, setListening] = useState(false);
 
   const balance = useBalance(props.provider, props.address);
 
@@ -48,7 +48,7 @@ export default function Balance(props) {
   }
 
   if (usingBalance) {
-    const etherBalance = formatEther(usingBalance);
+    const etherBalance = utils.formatEther(usingBalance);
     parseFloat(etherBalance).toFixed(2);
     floatBalance = parseFloat(etherBalance);
   }

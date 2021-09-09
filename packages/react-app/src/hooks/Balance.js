@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
-import usePoller from "./Poller";
+import { useCallback, useState } from "react";
 import useOnBlock from "./OnBlock";
+import usePoller from "./Poller";
 
 /*
   ~ What it does? ~
@@ -18,7 +18,7 @@ import useOnBlock from "./OnBlock";
   - If no pollTime is passed, the balance will update on every new block
 */
 
-let DEBUG = false;
+const DEBUG = false;
 
 export default function useBalance(provider, address, pollTime = 0) {
   const [balance, setBalance] = useState();

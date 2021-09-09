@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from "react";
 import { Card } from "antd";
-import { useContractLoader, useContractExistsAtAddress } from "../../hooks";
+import React, { useMemo, useState } from "react";
+import { useContractExistsAtAddress, useContractLoader } from "../../hooks";
 import Account from "../Account";
 import DisplayVariable from "./DisplayVariable";
 import FunctionForm from "./FunctionForm";
@@ -11,15 +11,15 @@ const noContractDisplay = (
     <div style={{ padding: 32 }}>
       You need to run{" "}
       <span
-        class="highlight"
-        style={{ marginLeft: 4, /*backgroundColor: "#f1f1f1",*/ padding: 4, borderRadius: 4, fontWeight: "bolder" }}
+        className="highlight"
+        style={{ marginLeft: 4, /* backgroundColor: "#f1f1f1", */ padding: 4, borderRadius: 4, fontWeight: "bolder" }}
       >
         yarn run chain
       </span>{" "}
       and{" "}
       <span
-        class="highlight"
-        style={{ marginLeft: 4, /*backgroundColor: "#f1f1f1",*/ padding: 4, borderRadius: 4, fontWeight: "bolder" }}
+        className="highlight"
+        style={{ marginLeft: 4, /* backgroundColor: "#f1f1f1", */ padding: 4, borderRadius: 4, fontWeight: "bolder" }}
       >
         yarn run deploy
       </span>{" "}
@@ -31,8 +31,8 @@ const noContractDisplay = (
       </span>
       Warning: You might need to run
       <span
-        class="highlight"
-        style={{ marginLeft: 4, /*backgroundColor: "#f1f1f1",*/ padding: 4, borderRadius: 4, fontWeight: "bolder" }}
+        className="highlight"
+        style={{ marginLeft: 4, /* backgroundColor: "#f1f1f1", */ padding: 4, borderRadius: 4, fontWeight: "bolder" }}
       >
         yarn run deploy
       </span>{" "}
@@ -53,8 +53,9 @@ export default function Contract({
   show,
   price,
   blockExplorer,
+  chainId,
 }) {
-  const contracts = useContractLoader(provider);
+  const contracts = useContractLoader(provider, { chainId });
   let contract;
   if (!customContract) {
     contract = contracts ? contracts[name] : "";

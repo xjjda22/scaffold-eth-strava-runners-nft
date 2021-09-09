@@ -1,3 +1,4 @@
+//StravaActivityMap
 import React, { useState, useEffect } from "react";
 import { Button, Space, Row, Col, Card, Steps, Radio } from "antd";
 import axios from "axios";
@@ -151,11 +152,11 @@ const initCanvasFrabic = async () => {
     let btxt = await new fabric.Text(_bm, {
       selectable: false,
       evented: false,
-      left: cWidth - cPadding - 160,
+      left: cWidth - cPadding - 170,
       top: cPadding + 10,
       fontFamily: "Overpass Mono, sans-serif",
-      fontSize: 15,
-      fontWeight: "bold",
+      fontSize: 18,
+      // fontWeight: "bold",
       // fill: "#cb0505",
       fill: "#fff",
       shadow: "rgba(0,0,0,0.3) 3px 3px 3px",
@@ -274,6 +275,7 @@ const initCanvasFrabic = async () => {
     setTimeout(() => {
       for (i in _savedDrawing) {
         _item = _savedDrawing[i];
+        _item.selectable = false;
         _path = new fabric.Path(_item.path.join(","), _item);
         canvasFrabic.add(_path);
       }
@@ -1070,90 +1072,91 @@ export default function StravaActivityMap({ address, tx, writeContracts }) {
             randomize stamp
           </Button>
         </Space>
-        <br />
-        <Space align="center" 
-          style={{ marginTop: 10, marginBottom: 10 }}
-        >
-          <Button
-            type={"primary"}
-            onClick={() => {
-              saveData();
-            }}
+        <Space direction="vertical" align="center" style={{width:"100%"}}>
+          <Space align="center" 
+            // style={{ marginTop: 10, marginBottom: 10 }}
           >
-            Save Data
-          </Button>
-          <Button
-            type={"primary"}
-            onClick={() => {
-              saveImage();
-            }}
+            <Button
+              type={"primary"}
+              onClick={() => {
+                saveData();
+              }}
+            >
+              Save Data
+            </Button>
+            <Button
+              type={"primary"}
+              onClick={() => {
+                saveImage();
+              }}
+            >
+              Save Image
+            </Button>
+          </Space>
+          <Space align="center" 
+            // style={{ marginTop: 10, marginBottom: 10 }}
           >
-            Save Image
-          </Button>
-        </Space>
-        <Space align="center" 
-          style={{ marginTop: 10, marginBottom: 10 }}
-        >
-          <Button
-            type={"primary"}
-            onClick={async () => {
-              start();
-            }}
+            <Button
+              type={"primary"}
+              onClick={async () => {
+                start();
+              }}
+            >
+              start draw
+            </Button>
+            <Button
+              type={"primary"}
+              onClick={async () => {
+                pause();
+              }}
+            >
+              pause draw
+            </Button>
+            <Button
+              type={"primary"}
+              onClick={async () => {
+                play();
+              }}
+            >
+              Play
+            </Button>
+            <Button 
+              type={"primary"} 
+              onClick={async () => {
+                clear();
+              }}
+            >
+              clear
+            </Button>
+            <Button
+              type={"primary"}
+              onClick={async () => {
+                undo();
+              }}
+            >
+              undo
+            </Button>
+          </Space>
+          <Space align="center" 
+            // style={{ marginTop: 10, marginBottom: 10 }}
           >
-            start draw
-          </Button>
-          <Button
-            type={"primary"}
-            onClick={async () => {
-              pause();
-            }}
-          >
-            pause draw
-          </Button>
-          <Button
-            type={"primary"}
-            onClick={async () => {
-              play();
-            }}
-          >
-            Play
-          </Button>
-          <Button 
-            type={"primary"} 
-            onClick={async () => {
-              clear();
-            }}
-          >
-            clear
-          </Button>
-          <Button
-            type={"primary"}
-            onClick={async () => {
-              undo();
-            }}
-          >
-            undo
-          </Button>
-        </Space>
-        <Space align="center" 
-          style={{ marginTop: 10, marginBottom: 10 }}
-        >
-          <Button
-            type={"primary"}
-            onClick={() => {
-              uploadIpfs();
-            }}
-          >
-            Upload to ipfs
-          </Button>
-          <Button
-            type={"primary"}
-            onClick={() => {
-              mint();
-            }}
-          >
-            mint nft
-          </Button>
+            <Button
+              type={"primary"}
+              onClick={() => {
+                uploadIpfs();
+              }}
+            >
+              Upload to ipfs
+            </Button>
+            <Button
+              type={"primary"}
+              onClick={() => {
+                mint();
+              }}
+            >
+              mint nft
+            </Button>
+          </Space>
         </Space>
       </Card>
       <Card title="Preview Image" style={{ margin: "auto", marginTop: 10, paddingBottom: 10 }}>
