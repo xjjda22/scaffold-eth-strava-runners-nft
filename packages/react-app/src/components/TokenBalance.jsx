@@ -33,7 +33,7 @@ export default function TokenBalance(props) {
     <span
       style={{
         verticalAlign: "middle",
-        fontSize: 24,
+        fontSize: 16,
         padding: 8,
         cursor: "pointer",
       }}
