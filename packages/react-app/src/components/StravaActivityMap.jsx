@@ -493,7 +493,7 @@ const initMaps = async () => {
 };
 //-- end - openstreet maps --
 
-export default function StravaActivityMap({ address, tx, writeContracts, provider, gas, ethPrice }) {
+export default function StravaActivityMap({ address, tx, readContracts, writeContracts, provider, gas, ethPrice }) {
   // const [code, setCode] = useState();
 
   const [accessToken, setAccessToken] = useSimpleLocalStorage("accessToken");
@@ -870,11 +870,11 @@ export default function StravaActivityMap({ address, tx, writeContracts, provide
   const mint_est = async () => {
     const _ipfsResult = await JSON.parse(window.localStorage.getItem("ipfsJson"));
     // console.log("_ipfsResult", _ipfsResult);
-    // console.log("_ipfsResult", tx, writeContracts);
+    // console.log("_ipfsResult", tx, readContracts);
 
-    // tx(writeContracts.YourCollectible.mintItem(_ipfsResult.path));
+    // tx(readContracts.YourCollectible.mintItem(_ipfsResult.path));
     
-    let gl = await provider.signer.estimateGas(writeContracts.YourCollectible.mintItem(_ipfsResult.path));
+    let gl = await provider.signer.estimateGas(readContracts.YourCollectible.mintItem(_ipfsResult.path));
     gl = gl.toString();
     const fg = toGWei(gas);
     const gm = fromWei(fg * gl);
