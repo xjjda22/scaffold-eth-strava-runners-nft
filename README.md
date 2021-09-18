@@ -1,4 +1,4 @@
-# 🏗 Scaffold-ETH
+# 🏗 Scaffold-ETH - strava nft
 
 > everything you need to build on Ethereum! 🚀
 
@@ -14,7 +14,7 @@ Prerequisites: [Node](https://nodejs.org/en/download/) plus [Yarn](https://class
 > clone/fork 🏗 scaffold-eth:
 
 ```bash
-git clone https://github.com/austintgriffith/scaffold-eth.git
+git clone https://github.com/harryranakl/scaffold-eth-strava-nft.git
 ```
 
 > install and start your 👷‍ Hardhat chain:
