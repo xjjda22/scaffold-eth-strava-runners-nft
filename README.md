@@ -14,7 +14,7 @@ Prerequisites: [Node](https://nodejs.org/en/download/) plus [Yarn](https://class
 > clone/fork 🏗 scaffold-eth:
 
 ```bash
-git clone https://github.com/harryranakl/scaffold-eth-strava-nft.git
+git clone https://github.com/xjjda22/scaffold-eth-strava-nft.git
 ```
 
 > install and start your 👷‍ Hardhat chain:
