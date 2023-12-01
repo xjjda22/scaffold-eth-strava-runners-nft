@@ -471,7 +471,7 @@ function App(props) {
                 <a
                   target="_blank"
                   style={{ color: "#000" }}
-                  href="https://github.com/harryranakl/scaffold-eth-strava-runners-nft"
+                  href="https://github.com/xjjda22/scaffold-eth-strava-runners-nft"
                 >
                   🍴 Repo: Fork me!
                 </a>
